@@ -1,0 +1,19 @@
+<p>OpenSAB se empareja con la <b>unidad telemática Bluetooth (BTU)</b> de las motos Honda recientes, usa el cuadro de instrumentos como pantalla remota y lee los mandos del manillar. Sin nube, sin cuenta, sin root: la moto pinta lo que el móvil le manda y todo lo demás se hace en el teléfono.</p>
+
+<p><b>En el cuadro</b></p>
+<ul>
+<li><b>Música:</b> lo que suena en tu reproductor, pausa y salto de pista, volumen desde el manillar, con cualquier reproductor que use los controles multimedia de Android; opcionalmente arranca la música al conectar la moto.</li>
+<li><b>Llamadas:</b> llamadas entrantes para contestar o rechazar; llama a un contacto favorito o di un nombre.</li>
+<li><b>Mensajes:</b> los mensajes nuevos de las apps de mensajería habituales se anuncian, se muestran y se leen en voz alta; responde por voz o con una respuesta rápida; escribe un SMS nuevo desde el manillar.</li>
+<li><b>Navegación:</b> el siguiente giro del guiado de Google Maps, con su flecha y la distancia; empieza una ruta diciendo el destino.</li>
+<li><b>Tiempo:</b> el tiempo actual y el de las próximas horas, de Open-Meteo.</li>
+<li><b>Voz y avisos sonoros</b> por el intercomunicador del casco, para saber dónde estás sin mirar.</li>
+</ul>
+
+<p>El móvil muestra en directo un espejo de lo que hay en el cuadro.</p>
+
+<p><b>Motos:</b> probada en una Honda CB650R (2024) con su cuadro TFT a color. Otras Honda con BTU deberían funcionar; los informes de dueños de otras motos son muy bienvenidos en el gestor de incidencias del proyecto.</p>
+
+<p><b>Para qué es cada permiso:</b> solo hace falta Bluetooth; cada uno de los demás activa una función y la app sigue funcionando sin él. Bluetooth encuentra la moto y habla con ella. El acceso a notificaciones lee el reproductor, las llamadas, los mensajes y el guiado de Google Maps. Contactos, teléfono y SMS sirven para llamar o escribir desde el manillar. El micrófono es para las órdenes por voz y el dictado. La ubicación aproximada solo se usa para consultar el tiempo, que es la única conexión a internet de la app. «Mostrar sobre otras apps» permite que la música arranque con el móvil en el bolsillo.</p>
+
+<p>OpenSAB es un proyecto independiente, sin relación con Honda Motor Co., Ltd. ni respaldo suyo. «Honda» es una marca de su titular y aquí solo se usa para describir la compatibilidad. No toques el móvil mientras conduces.</p>

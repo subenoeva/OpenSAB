@@ -1,0 +1,3 @@
+- The APK no longer carries Google's encrypted dependency metadata block, so app stores that build or inspect the APK (F-Droid, IzzyOnDroid) can accept it.
+- Store listing metadata.
+No change in what the app does.

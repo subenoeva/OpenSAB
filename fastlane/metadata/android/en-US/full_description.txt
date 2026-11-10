@@ -1,0 +1,19 @@
+<p>OpenSAB pairs with the <b>Bluetooth Telematics Unit (BTU)</b> of recent Honda motorcycles, drives the instrument cluster as a remote display and reads the handlebar switches back. No cloud, no account, no root: the bike renders what the phone sends, and everything else runs on the phone.</p>
+
+<p><b>On the cluster</b></p>
+<ul>
+<li><b>Music:</b> what your player is playing, pause and skip, volume from the handlebar, for any player that exposes Android's media controls; optionally starts your music when the bike connects.</li>
+<li><b>Calls:</b> incoming calls with answer and decline; dial a starred contact or say a name.</li>
+<li><b>Messages:</b> new messages from common messaging apps announced, shown and read aloud; reply by voice or with a canned answer; write a new SMS from the handlebar.</li>
+<li><b>Navigation:</b> the next turn from Google Maps guidance, with its arrow and distance; start a route by saying the destination.</li>
+<li><b>Weather:</b> current conditions and the next hours, from Open-Meteo.</li>
+<li><b>Voice and sound cues</b> through the helmet headset, so you know where you are without looking.</li>
+</ul>
+
+<p>The phone shows a live mirror of what is on the cluster.</p>
+
+<p><b>Bikes:</b> tested on a Honda CB650R (2024) with its colour TFT cluster. Other Honda models with a BTU should work; reports from owners of other bikes are very welcome on the project's issue tracker.</p>
+
+<p><b>Why each permission:</b> nothing is required except Bluetooth; every other permission unlocks one feature and the app keeps working without it. Bluetooth finds and talks to the bike. Notification access reads the music player, calls, messages and Google Maps guidance. Contacts, phone and SMS let you call or text from the handlebar. Microphone is for voice commands and dictation. Approximate location is used only for the weather lookup, which is the app's only network call. "Display over other apps" lets music start from the pocket.</p>
+
+<p>OpenSAB is an independent project, not affiliated with or endorsed by Honda Motor Co., Ltd. "Honda" is a trademark of its owner, used here only to describe compatibility. Never interact with the phone while riding.</p>

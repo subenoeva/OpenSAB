@@ -11,8 +11,15 @@ android {
     namespace = "com.opensab.app"
     defaultConfig {
         applicationId = "com.opensab"
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
+    }
+
+    // No dependency metadata block in the APK: it is encrypted with a key only Google holds, so
+    // F-Droid and IzzyOnDroid cannot inspect it and refuse the APK.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 
     // The release key never lives in the tree: CI decodes it from a secret and passes its path and

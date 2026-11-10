@@ -1,0 +1,1 @@
+Open client for the Bluetooth telematics unit of Honda motorcycles

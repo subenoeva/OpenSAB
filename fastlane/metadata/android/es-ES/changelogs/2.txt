@@ -1,0 +1,3 @@
+- El APK ya no lleva el bloque cifrado de metadatos de dependencias de Google, así que las tiendas que compilan o inspeccionan el APK (F-Droid, IzzyOnDroid) pueden aceptarlo.
+- Metadatos de la ficha de tienda.
+La app hace exactamente lo mismo que antes.

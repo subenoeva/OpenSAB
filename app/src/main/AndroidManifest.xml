@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- BLE permissions for Android 12+ (API 31+) -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- BLE legacy permissions for Android 8 to 11 (API 26-30) -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
+
+    <!-- Weather: the forecast comes from Open-Meteo over HTTPS, for the rider's coarse position.
+         ACCESS_FINE_LOCATION above is capped at API 30 and belongs to the legacy BLE scan, so it
+         does not cover this; a couple of kilometres is exact enough for a forecast anyway. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Foreground service for continuous motorcycle connection -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+        tools:targetApi="upside_down_cake" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"
+        tools:targetApi="upside_down_cake" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"
+        tools:targetApi="upside_down_cake" />
+
+    <!-- Post notifications on Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"
+        tools:targetApi="tiramisu" />
+
+    <!-- Telephony. The incoming call arrives as a Notification$CallStyle over the listener that
+         already exists for media, so none of this needs a dialer role, a call log or a contact
+         book: the dialer resolved the name before publishing.
+         The one below is the standby for a dialer that published CallStyle without its intents.
+         No screen requests it today and no such dialer has been observed. -->
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
+
+    <!-- Dictating a reply to a message. Deliberately absent until the row that uses it: a
+         microphone permission declared before anything listens is visible in the Play listing.
+         It is requested from the permissions screen and never at start-up, because permissions
+         are not granted from a handlebar. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Dialling by voice: the address book to find who, Telecom to place the call.
+         CALL_PHONE is not a restricted permission in Play, unlike READ_CALL_LOG, which is why
+         the call history stays out of v1.0 and the favourites cover the case. -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
+    <!-- Battery: the ACL receiver and SabConnectionService are what auto-connect is made of, and a
+         phone that is free to doze through both makes the motorcycle look broken. Requested from
+         the permissions screen, never at start-up, and a "no" costs auto-connect and nothing else. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Partial wake lock: keeps CPU alive during background IPC media launch while phone is locked in pocket -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Allows starting activities from background/lockscreen when phone is locked in pocket (BAL exemption) -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Hardware features -->
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+
+    <!-- Package visibility for discovering installed media players and navigation apps (Android 11+) -->
+    <queries>
+        <intent>
+            <action android:name="android.media.browse.MediaBrowserService" />
+        </intent>
+        <intent>
+            <action android:name="androidx.media.MediaBrowserServiceCompat" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.APP_MUSIC" />
+        </intent>
+        <!-- Text-to-speech: the engine lives in another app and is invisible without this -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+        <!-- Standard and Streaming Music Apps -->
+        <package android:name="com.spotify.music" />
+        <package android:name="com.google.android.apps.youtube.music" />
+        <package android:name="com.google.android.youtube" />
+        <package android:name="com.apple.android.music" />
+        <package android:name="com.amazon.mp3" />
+        <package android:name="deezer.android.app" />
+        <package android:name="com.aspiro.tidal" />
+        <package android:name="com.soundcloud.android" />
+        <package android:name="com.qobuz.music" />
+        <package android:name="com.pandora.android" />
+        <package android:name="com.bandcamp.android" />
+        <package android:name="com.mixcloud.player" />
+        <package android:name="com.napster.android" />
+
+        <!-- Local & Open Source Music Players -->
+        <package android:name="org.videolan.vlc" />
+        <package android:name="com.maxmpz.audioplayer" />
+        <package android:name="in.krosbits.musicolet" />
+        <package android:name="com.aimp.player" />
+        <package android:name="org.schabi.newpipe" />
+        <package android:name="com.foobar2000.foobar2000" />
+        <package android:name="com.neutroncode.mp" />
+        <package android:name="gonemad.gmmp" />
+        <package android:name="com.stellio.music" />
+        <package android:name="com.eugened.player" />
+        <package android:name="com.kodarkooperativet.blackplayerex" />
+        <package android:name="com.rhmsoft.pulsar" />
+        <package android:name="com.rhmsoft.pulsar.pro" />
+        <package android:name="com.rhmsoft.fm.music" />
+        <package android:name="com.kabouzeid.gramophone" />
+        <package android:name="code.name.monkey.retromusic" />
+        <package android:name="com.simplemobiletools.musicplayer" />
+        <package android:name="com.simplemobiletools.musicplayer.pro" />
+        <package android:name="com.fossify.musicplayer" />
+        <package android:name="com.spotube" />
+
+        <!-- Podcasts & Audiobooks -->
+        <package android:name="com.ivoox.app" />
+        <package android:name="au.com.shiftyjelly.pocketcasts" />
+        <package android:name="de.danoeh.antennapod" />
+        <package android:name="com.audible.application" />
+        <package android:name="fm.castbox.audiobook.radio.podcast" />
+        <package android:name="com.bambuna.podcastaddict" />
+        <package android:name="com.itunestoppodcastplayer.app" />
+        <package android:name="com.storytel.app" />
+        <package android:name="com.nextory.app" />
+
+        <!-- Radio Streaming -->
+        <package android:name="tunein.player" />
+        <package android:name="tunein.playermusic" />
+        <package android:name="com.audials" />
+        <package android:name="radioplayer.es" />
+        <package android:name="com.streema.simpleradio" />
+        <package android:name="com.accu.radio" />
+
+        <!-- ReVanced, RVX, Morphe and Modded music apps -->
+        <package android:name="app.revanced.android.apps.youtube.music" />
+        <package android:name="app.revanced.android.youtube" />
+        <package android:name="app.revanced.android.apps.spotify" />
+        <package android:name="app.revanced.android.apps.soundcloud" />
+        <package android:name="app.revanced.android.apps.tidal" />
+        <package android:name="app.revanced.android.apps.deezer" />
+        <package android:name="app.rvx.android.apps.youtube.music" />
+        <package android:name="app.rvx.android.youtube" />
+        <package android:name="app.rvx.android.apps.spotify" />
+        <package android:name="app.morphe.android.apps.youtube.music" />
+        <package android:name="app.morphe.android.youtube" />
+        <package android:name="com.morphe.android.apps.youtube.music" />
+        <package android:name="com.morphe.android.youtube" />
+        <package android:name="com.vanced.android.apps.youtube.music" />
+        <package android:name="com.spotify.music.revanced" />
+        <package android:name="com.vimusic.app" />
+        <package android:name="com.innertune.app" />
+        <package android:name="com.zionhuang.music" />
+        <package android:name="com.metareal.musify" />
+        <package android:name="com.shadow.music" />
+
+        <!-- Navigation app OpenSAB can launch and read; also its drawings for the arrow catalog -->
+        <package android:name="com.google.android.apps.maps" />
+
+        <!-- Schemes for turn-by-turn navigation launch -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="google.navigation" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".OpenSabApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:windowSoftInputMode="adjustResize"
+        android:theme="@style/Theme.OpenSAB">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.OpenSAB.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Started by the ACL receiver so the session's service is born with the app on top and
+             gets the microphone. Its own task, out of recents, and gone after a second. -->
+        <activity
+            android:name=".service.SessionBootstrapActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.OpenSAB.Bootstrap" />
+
+        <!-- Empty listener: it exists so the user can grant media access, which is what
+             MediaSessionManager.getActiveSessions requires. -->
+        <service
+            android:name=".source.music.OpenSabNotificationListenerService"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.SabConnectionService"
+            android:foregroundServiceType="connectedDevice|location|microphone"
+            android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.journal"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/journal_exports" />
+        </provider>
+
+        <!-- Automatically connects/disconnects when Honda motorcycle Bluetooth link is detected -->
+        <receiver
+            android:name=".service.BluetoothDeviceStateReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

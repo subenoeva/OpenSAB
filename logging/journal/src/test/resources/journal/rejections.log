@@ -1,0 +1,5 @@
+2026-09-03 12:10:32.768 [W/OpenSAB] BTU rejected projection frame: commandId=0x01, requestId=8, status=0x0C, errorPosition=21
+2026-09-03 12:22:21.502 [W/OpenSAB] BTU rejected projection frame: commandId=0x01, requestId=65, status=0x0C, errorPosition=21
+2026-09-03 12:25:12.930 [W/OpenSAB] BTU rejected projection frame: commandId=0x01, requestId=127, status=0x0C, errorPosition=21
+2026-09-03 12:28:25.972 [W/OpenSAB] BTU rejected projection frame: commandId=0x01, requestId=169, status=0x0C, errorPosition=21
+2026-09-03 12:31:15.968 [W/OpenSAB] BTU rejected projection frame: commandId=0x01, requestId=216, status=0x0C, errorPosition=22

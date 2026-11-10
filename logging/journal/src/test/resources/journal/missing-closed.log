@@ -1,0 +1,34 @@
+2026-09-14 14:04:35.640 [D/OpenSAB] Transmitting active indicators mask 0x00 [4 bytes]: 03 5E 00 00
+2026-09-14 14:04:35.715 [I/OpenSAB] BTU acknowledged frame successfully: commandId=0x03, requestId=94
+2026-09-14 14:04:43.861 [D/OpenSAB] Transmitting active indicators mask 0x00 [4 bytes]: 03 5F 00 00
+2026-09-14 14:04:44.710 [D/OpenSAB] CTS onConnectionStateChange: device=02:00:00:00:00:01, newState=0
+2026-09-14 14:04:44.723 [W/OpenSAB] GATT disconnected from 02:00:00:00:00:01 with status 8 (GATT_CONN_TIMEOUT)
+2026-09-14 14:04:44.743 [I/OpenSAB] Spontaneous BLE disconnection detected, requesting session close
+2026-09-14 14:04:44.842 [I/OpenSAB] Disconnecting OpenSAB session and stopping all adapters
+2026-09-14 14:04:44.864 [I/OpenSAB] Active media session: none
+2026-09-14 14:04:44.865 [D/OpenSAB] Weather source stopped
+2026-09-14 14:04:44.867 [D/OpenSAB] BluetoothDeviceStateReceiver: action=android.bluetooth.device.action.ACL_DISCONNECTED, device=HONDA BTU 0001 (02:00:00:00:00:01) -> decision=Disconnect(macAddress=02:00:00:00:00:01)
+2026-09-14 14:04:44.867 [I/OpenSAB] Auto-disconnecting motorcycle session: 02:00:00:00:00:01
+2026-09-14 14:04:44.870 [I/OpenSAB] SabSession #1 closing (LINK_LOST), 7 close actions
+2026-09-14 14:04:44.878 [D/OpenSAB] SabConnectionService onStartCommand with action: com.opensab.service.DISCONNECT
+2026-09-14 14:04:44.879 [I/OpenSAB] Stopping connection service
+2026-09-14 14:04:44.881 [I/OpenSAB] Disconnecting OpenSAB session and stopping all adapters
+2026-09-14 14:04:44.881 [D/OpenSAB] Weather source stopped
+2026-09-14 14:04:44.891 [I/OpenSAB] Session is Disconnected, stopping SabConnectionService
+2026-09-14 14:04:44.941 [I/OpenSAB] CTS GATT server stopped
+2026-09-14 14:04:44.943 [I/OpenSAB] Disconnecting GATT from 02:00:00:00:00:01
+2026-09-14 14:04:44.959 [W/OpenSAB] ControlPoint notifications subscription terminated with error
+kotlinx.coroutines.JobCancellationException: Job was cancelled; job=SupervisorJobImpl{Cancelling}@746f74c
+
+kotlinx.coroutines.JobCancellationException: Job was cancelled; job=SupervisorJobImpl{Cancelling}@746f74c
+2026-09-14 14:04:44.962 [W/OpenSAB] FunctionNotification observation failed
+kotlinx.coroutines.JobCancellationException: Job was cancelled; job=SupervisorJobImpl{Cancelling}@746f74c
+
+kotlinx.coroutines.JobCancellationException: Job was cancelled; job=SupervisorJobImpl{Cancelling}@746f74c
+2026-09-14 15:43:51.723 [D/OpenSAB] Notification removed for com.whatsapp: route=MESSAGE, key=0|com.whatsapp|1|VR8WwzCl3q+6V/l2zGZmFK5i4NHsiTdarpB7V4kOMic=
+|10271
+2026-09-14 15:43:51.734 [D/OpenSAB] Message notification removed for com.whatsapp
+2026-09-14 15:43:51.880 [D/OpenSAB] Notification removed for com.whatsapp: route=MESSAGE, key=0|com.whatsapp|1|null|10271
+2026-09-14 15:43:51.881 [D/OpenSAB] Message notification removed for com.whatsapp
+2026-09-14 15:49:15.553 [D/OpenSAB] BluetoothDeviceStateReceiver: action=android.bluetooth.device.action.ACL_CONNECTED, device=HONDA BTU 0001 (02:00:00:00:00:01) -> decision=Connect(macAddress=02:00:00:00:00:01)
+2026-09-14 15:49:15.562 [I/OpenSAB] Auto-connecting to known Honda BTU: 02:00:00:00:00:01

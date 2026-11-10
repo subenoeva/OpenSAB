@@ -1,0 +1,206 @@
+package com.opensab.sab.protocol.projection
+
+/**
+ * Icon ids the cluster renders. Ids repeat on purpose: they are scoped to the frame slot the byte
+ * travels in, not to a flat catalog. `MENU_ARROW_LEFT`, `LIVE_ARROW_LEFT`, `POPUP_ARROW_LEFT`,
+ * `LIVE_CANCEL_ONE_BUTTON`, `POPUP_CANCEL` and `CALL` are all 1; the cluster tells them apart by
+ * which field carries them, so renumbering a block to remove a collision would break rendering.
+ * [fromId] is therefore ambiguous by construction and only safe where the slot is already known.
+ */
+enum class IconId(val id: Int) {
+    IC_NONE(0),
+
+    // System & Navigation Arrows
+    MENU_ARROW_LEFT(1),
+    MENU_ARROW_RIGHT(2),
+    MENU_ARROW_UP(3),
+    MENU_ARROW_DOWN(4),
+    MENU_ARROW_RIGHT_BIG(5),
+    LIVE_ARROW_LEFT(1),
+    LIVE_ARROW_RIGHT(2),
+    LIVE_ARROW_UP(3),
+    LIVE_ARROW_DOWN(4),
+    POPUP_ARROW_LEFT(1),
+    POPUP_ARROW_RIGHT(2),
+    POPUP_ARROW_UP(3),
+    POPUP_ARROW_DOWN(4),
+
+    // Live Screen & Popup Action Buttons
+    LIVE_CANCEL_ONE_BUTTON(1),
+    LIVE_HANG_UP_ONE_BUTTON(2),
+    LIVE_PLAY(3),
+    LIVE_PAUSE(4),
+    LIVE_NEXT(5),
+    LIVE_RETRY(6),
+    LIVE_SEND(7),
+    LIVE_CANCEL_TWO_BUTTONS(8),
+    LIVE_ACCEPT(9),
+    LIVE_VOLUME_DOWN(10),
+    LIVE_VOLUME_UP(11),
+    LIVE_HANG_UP_TWO_BUTTONS(12),
+    LIVE_CALL(13),
+    LIVE_REPLY(14),
+    LIVE_NEGATIVE(15),
+
+    POPUP_CANCEL(1),
+    POPUP_HANGUP(2),
+    POPUP_CALL(3),
+    POPUP_PLAY(4),
+    POPUP_PAUSE(5),
+    POPUP_NEXT(6),
+    POPUP_RETRY(7),
+    POPUP_SEND(8),
+    POPUP_ACCEPT(9),
+    POPUP_VOLUME_DOWN(10),
+    POPUP_VOLUME_UP(11),
+    POPUP_REPLY(12),
+
+    // Main Menu Categories
+    CALL(1),
+    NAVIGATION(2),
+    MUSIC(3),
+    MESSAGE(4),
+    VOLUME(5),
+    SEARCH(6),
+    MIC(7),
+    REVIEW(8),
+    SEND(9),
+
+    // Weather
+    WEATHER_SUNNY(10),
+    WEATHER_CLEAR(11),
+    WEATHER_SUN_AND_CLOUD(12),
+    WEATHER_CLOUDY(13),
+    WEATHER_RAIN(14),
+    WEATHER_STORM(15),
+    WEATHER_SNOW(16),
+    WEATHER_FOG(17),
+    FORECAST(90),
+    NO_WEATHER(91),
+
+    // Lane Guidance
+    DA_LANE_DOTS(18),
+    DA_LANE_STRAIGHT_TALL(19),
+    DA_LANE_STRAIGHT(20),
+    DA_LANE_STUB(21),
+    DA_LANEGUIDANCE_TICK(22),
+    DA_LANE_NORMAL_SHORT(23),
+    DA_LANE_NORMAL(24),
+    DA_LANE_SHARP_SHORT(25),
+    DA_LANE_SHARP(26),
+    DA_LANE_SLIGHT_TALL(27),
+    DA_LANE_SLIGHT(28),
+    DA_LANE_UTURN_SHORT(29),
+    DA_LANE_UTURN(30),
+    DA_LANE_NORMAL_SHORT_LEFT(31),
+    DA_LANE_NORMAL_LEFT(32),
+    DA_LANE_SHARP_SHORT_LEFT(33),
+    DA_LANE_SHARP_LEFT(34),
+    DA_LANE_SLIGHT_TALL_LEFT(35),
+    DA_LANE_SLIGHT_LEFT(36),
+    DA_LANE_UTURN_SHORT_LEFT(37),
+    DA_LANE_UTURN_LEFT(38),
+
+    // Turn-by-Turn Drive Assist Maneuvers
+    DA_TURN_STRAIGHT(39),
+    DA_TURN_ARRIVE(40),
+    DA_TURN_DEPART(41),
+    DA_TURN_GENERIC_MERGE(42),
+    DA_TURN_MYLOCATION(43),
+    DA_TURN_RIGHT(44),
+    DA_TURN_SHARP_RIGHT(45),
+    DA_TURN_SLIGHT_RIGHT(46),
+    DA_TURN_UTURN(47),
+    DA_TURN_FORK_RIGHT(48),
+    DA_TURN_GENERIC_ROUNDABOUT(49),
+    DA_TURN_RAMP_RIGHT(50),
+    DA_TURN_ROUNDABOUT_EXIT(51),
+    DA_TURN_ARRIVE_RIGHT(52),
+
+    DA_TURN_LEFT(53),
+    DA_TURN_SHARP_LEFT(54),
+    DA_TURN_SLIGHT_LEFT(55),
+    DA_TURN_UTURN_LEFT(56),
+    DA_TURN_FORK_LEFT(57),
+    DA_TURN_GENERIC_ROUNDABOUT_LEFT(58),
+    DA_TURN_RAMP_LEFT(59),
+    DA_TURN_ROUNDABOUT_EXIT_LEFT(60),
+    DA_TURN_ARRIVE_LEFT(61),
+
+    // Roundabouts Right
+    DA_TURN_ROUNDABOUT_1(62),
+    DA_TURN_ROUNDABOUT_2(63),
+    DA_TURN_ROUNDABOUT_3(64),
+    DA_TURN_ROUNDABOUT_4(65),
+    DA_TURN_ROUNDABOUT_5(66),
+    DA_TURN_ROUNDABOUT_6(67),
+    DA_TURN_ROUNDABOUT_7(68),
+    DA_TURN_ROUNDABOUT_8(69),
+
+    // Roundabouts Left
+    DA_TURN_ROUNDABOUT_1_LEFT(70),
+    DA_TURN_ROUNDABOUT_2_LEFT(71),
+    DA_TURN_ROUNDABOUT_3_LEFT(72),
+    DA_TURN_ROUNDABOUT_4_LEFT(73),
+    DA_TURN_ROUNDABOUT_5_LEFT(74),
+    DA_TURN_ROUNDABOUT_6_LEFT(75),
+    DA_TURN_ROUNDABOUT_7_LEFT(76),
+    DA_TURN_ROUNDABOUT_8_LEFT(77),
+
+    // Special Indicators
+    DA_TURN_FERRY(78),
+    DA_YENS(79),
+    DA_CONSTRUCTION(80),
+    DA_ROTATE(81),
+    DA_ROTATE_LEFT(82),
+    DA_FLAG_END(83),
+    DA_FLAG_A(84),
+    DA_FLAG_B(85),
+
+    // Telephony, PDI, DFU, Volume
+    DFU_WARNING(86),
+    DFU_DOWNLOAD(87),
+    DFU_UPLOAD(88),
+    LOADING(89),
+
+    ACTIVE_NAVIGATION(92),
+    ACTIVE_CALL(93),
+    ACTIVE_MUSIC(94),
+
+    NEARBY_PLACES(95),
+    FAVORITE_PLACE(96),
+    NO_FAVORITE(97),
+    PLACE_RESULT(98),
+    NO_RESULTS(99),
+    NO_NETWORK(100),
+    CANCEL(101),
+    NAVIGATION_ENDED(102),
+
+    FAVORITE_CONTACT(103),
+    CONTACT_RESULT(104),
+    SIM(105),
+    HANG_UP(106),
+    INCOMING_CALL(107),
+    INCOMING_MESSAGE(108),
+    REPLY(109),
+    RETRY(110),
+    MUSIC_PLAYER(111),
+
+    GAS_STATION(112),
+    ATM(113),
+    PARKING(114),
+    CONVENIENCE_STORE(115),
+    REPAIR_SHOP(116),
+
+    VOLUME_STATIC(117),
+    VOLUME_LEVEL_0(118),
+    VOLUME_LEVEL_1(119),
+    VOLUME_LEVEL_2(120),
+    VOLUME_LEVEL_3(121),
+    VOLUME_LEVEL_4(122),
+    VOLUME_LEVEL_5(123);
+
+    companion object {
+        fun fromId(id: Int): IconId? = entries.find { it.id == id }
+    }
+}

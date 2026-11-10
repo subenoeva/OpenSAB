@@ -1,0 +1,25 @@
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+.gradle/
+.kotlin/
+local.properties
+
+# Build outputs
+build/
+.externalNativeBuild
+.cxx
+
+# Signing material never belongs in the tree
+*.jks
+*.keystore
+keystore.properties
+google-services.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Patch detritus: a stale .orig next to its source compiles fine and is never read
+*.orig
+*.rej

@@ -1,0 +1,9 @@
+
+¥
+app_settings_v1†*ù{"autoConnect":true,"autoDisconnect":true,"keepScreenOnWhileRiding":true,"showOnLockScreen":true,"clusterProfile":"AUTO","themeMode":"SYSTEM","favoriteMediaPackage":null,"autoResumeMusicOnConnect":false,"handlebarVolumeControl":true,"coldStartMediaId":null,"coldStartMediaLabel":null,"coldStartMediaPackage":null,"distanceUnit":"KILOMETERS","interceptGpsNotifications":true,"temperatureUnit":"FAHRENHEIT","inboundCallMode":"IGNORE","inboundMessageMode":"READ_DIRECTLY","soundCuesEnabled":true,"voiceVerbosity":"ADVANCED","quickReplies":["On my way","Line one\nline two"],"replySentLingerSeconds":5,"ctsClockSync":true,"permissionsIntroSeen":true,"verboseLogging":false}
+‹
+vehicle_02:00:00:00:00:01æ*ª{"macAddress":"02:00:00:00:00:01","displayName":"Honda Forza 750","vehicleInfo":{"vehicleType":1,"displayCapability":"0102","switchType":2,"categoryId":3,"seriesCode":"RH10","destinationId":1},"deviceInfo":{"manufacturerName":"Honda","modelNumber":"BTU-01","serialNumber":"SN-0001","hardwareRevision":"HW1","firmwareRevision":"FW2","softwareRevision":"SW3"},"firmwareVersion":{"major":"01","minor":"07"},"lastConnectedTimestamp":1700000000000}
+∞
+weather_last_readingó*î{"locationName":"Testville","temperature":21,"caption":"CLEAR","hourly":[{"timestamp":1700003600000,"temperature":20,"caption":"PARTLY_CLOUDY","type":"SUN_AND_CLOUD"},{"timestamp":1700007200000,"temperature":19,"caption":"OVERCAST","type":"CLOUDY"}],"timestamp":1700000000000}
+.
+favorite_media_package*com.example.player

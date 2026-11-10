@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.OpenSAB" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- The colour the splash was painted with. Without it the window under Compose stays
+             light in dark mode, and the first frame after the splash is a white flash. -->
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+
+    <!-- The launch theme. MainActivity swaps it for Theme.OpenSAB via postSplashScreenTheme as soon
+         as installSplashScreen() runs, so this is only ever the window's first paint.
+
+         The mark alone, with no wordmark under it: the branding slot sits low and detached from the
+         icon, and the name is on the first screen anyway. -->
+    <style name="Theme.OpenSAB.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.OpenSAB</item>
+    </style>
+
+    <!-- SessionBootstrapActivity: opaque, because a translucent window does not occlude the
+         keyguard and may never count as visible; black, because it is on screen for a second. -->
+    <style name="Theme.OpenSAB.Bootstrap" parent="android:Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+</resources>

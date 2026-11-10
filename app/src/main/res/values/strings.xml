@@ -1,0 +1,620 @@
+<resources>
+    <string name="app_name">OpenSAB</string>
+    <string name="value_not_available">N/A</string>
+
+    <string name="permission_grant_button">Grant permission</string>
+
+    <!-- Permissions Screen -->
+    <string name="permission_screen_title">Permissions</string>
+    <string name="permission_intro_title">Nothing here is required</string>
+    <string name="permission_intro_subtitle">This is everything OpenSAB can ask your phone for, and exactly what stops working without each one. Grant what you want, leave the rest, and carry on.</string>
+    <string name="permission_intro_footnote">All of it can be changed later, from Settings.</string>
+    <string name="permission_continue">Continue</string>
+
+    <!-- Permissions Screen · summary -->
+    <string name="permission_summary_count">%1$d/%2$d</string>
+    <string name="permission_summary_blocking">Nothing will connect</string>
+    <string name="permission_summary_blocking_desc">Bluetooth is how the motorcycle is found. Until it is both granted and turned on, the rest of this list has nothing to act on.</string>
+    <string name="permission_summary_partial">Granted in part</string>
+    <string name="permission_summary_partial_desc">Whatever is still missing costs only what its own row says, and nothing else.</string>
+    <string name="permission_summary_all_granted">Everything granted</string>
+    <string name="permission_summary_all_granted_desc">Nothing on this screen is standing in the way.</string>
+
+    <!-- Permissions Screen · groups -->
+    <string name="permission_group_essential">Essential</string>
+    <string name="permission_group_essential_caption">Without these there is no connection of any kind</string>
+    <string name="permission_group_optional">Features</string>
+    <string name="permission_group_optional_caption">Each one costs only what its own row says</string>
+
+    <!-- Permissions Screen · where a tap leads -->
+    <string name="permission_action_runtime">Opens the Android dialog</string>
+    <string name="permission_action_special">Opens a screen in Android settings</string>
+    <string name="permission_action_toggle">Opens the Android switch</string>
+
+    <!-- Permissions Screen · rows -->
+    <string name="permission_status_granted">Granted</string>
+    <string name="permission_status_denied">Not granted</string>
+    <string name="permission_status_unsupported">Unavailable</string>
+    <string name="permission_bluetooth_title">Bluetooth</string>
+    <string name="permission_bluetooth_desc">Without it the scan finds nothing and no connection is ever made. Everything else on this list depends on this one.</string>
+    <string name="permission_bluetooth_enabled_title">Bluetooth turned on</string>
+    <string name="permission_bluetooth_enabled_desc">No permission turns the radio on. It is a system switch, and with it off there is nothing to scan and nothing to connect to.</string>
+    <string name="permission_notification_access_title">Notification access</string>
+    <string name="permission_notification_access_desc">Music, calls, messages and turn-by-turn all reach the cluster through here. Without it the cluster stays blank.</string>
+    <string name="permission_battery_title">Unrestricted battery</string>
+    <string name="permission_battery_desc">Without it Android kills the connection service in the background, and auto-connect stops answering when you turn the key.</string>
+    <string name="permission_overlay_title">Display over other apps</string>
+    <string name="permission_overlay_desc">Without it Android blocks starting your music player from the background when the phone is locked in your pocket.</string>
+    <string name="permission_notifications_title">Notifications</string>
+    <string name="permission_notifications_desc">Without it the connection service keeps running with nothing visible to tap, so there is no way back into the app from the status bar.</string>
+    <string name="permission_location_weather_title">Approximate location</string>
+    <string name="permission_location_weather_desc">Without it the weather entry on the cluster stays empty: a forecast has to be asked for somewhere, and this is where that somewhere comes from.</string>
+    <string name="permission_location_services_title">Location turned on</string>
+    <string name="permission_location_services_desc">With the system location off the forecast has nowhere to be asked for, however granted the permission is.</string>
+    <string name="permission_microphone_title">Microphone</string>
+    <string name="permission_microphone_desc">Without it there is no dictating a reply from the handlebar. The four fixed replies keep working either way.</string>
+    <string name="permission_contacts_title">Contacts</string>
+    <string name="permission_contacts_desc">To find who you are calling by name. It is only read, never changed, and nothing leaves the phone.</string>
+    <string name="permission_place_calls_title">Placing calls</string>
+    <string name="permission_place_calls_desc">To dial from the handlebar. Without it the phone entry only shows a call that is already up.</string>
+    <string name="permission_answer_calls_title">Answering calls</string>
+    <string name="permission_answer_calls_desc">A spare, for dialers that publish a call without the intents to act on it. Nothing on the cluster depends on it today.</string>
+    <string name="permission_answer_calls_unsupported_desc">Incoming calls arrive as a CallStyle notification, which Android added in version 12. This phone is older, so the cluster cannot be told about a call at all.</string>
+    <string name="permission_send_sms_title">Send SMS</string>
+    <string name="permission_send_sms_desc">To compose and send text messages from the handlebar. Without it the messages compose menu stays closed.</string>
+
+    <!-- Permissions elsewhere in the app -->
+    <string name="settings_category_permissions">Permissions</string>
+    <string name="settings_permissions_summary">%1$d of %2$d granted · tap to review them</string>
+    <string name="scan_permissions_banner_title">Bluetooth permission missing</string>
+    <string name="scan_permissions_banner_desc">Scanning needs it. Nothing else in the app does, so this is the only thing standing in the way</string>
+    <string name="scan_error_permissions_missing">The Bluetooth permission went away mid-scan. Grant it again from the permissions screen.</string>
+    <string name="dashboard_open_permissions">Open permissions</string>
+
+    <!-- Vehicle Scan Screen -->
+    <string name="scan_subtitle">Motorcycle Discovery</string>
+    <string name="scan_button_start">Scan for Motorcycles</string>
+    <string name="scan_button_stop">Stop Scanning</string>
+    <string name="scan_saved_motorcycles">Saved Motorcycles (%1$d)</string>
+    <string name="scan_nearby_devices">Nearby Devices (%1$d)</string>
+    <string name="scan_searching_placeholder">Searching for Honda BTU clusters…</string>
+    <string name="scan_idle_placeholder">Tap ‘Scan’ to discover nearby motorcycles</string>
+    <string name="media_player_system_default">System Default / Active Player</string>
+    <string name="device_unknown_motorcycle">Unknown Motorcycle</string>
+    <string name="device_honda_motorcycle">Honda Motorcycle</string>
+    <string name="device_pairing_progress">Pairing with your motorcycle…</string>
+
+    <!-- Vehicle Scan Errors -->
+    <string name="scan_error_bond_failed">Could not pair with the motorcycle. Check that it is on and in pairing mode.</string>
+    <string name="scan_error_bond_failed_detail">%1$s. Forget the motorcycle in Bluetooth settings and try again.</string>
+    <string name="scan_error_bond_timeout">The motorcycle never finished pairing. Accept the pairing request on the phone, and check the cluster is on.</string>
+    <string name="scan_error_transport_unreachable">Could not reach the motorcycle. Check that it is on and within range.</string>
+    <string name="scan_error_pipeline_failed">Connection failed. Try again.</string>
+    <string name="scan_error_pipeline_failed_detail">Connection failed: %1$s</string>
+
+    <!-- Dashboard Screen -->
+    <string name="dashboard_title">Motorcycle Dashboard</string>
+    <string name="dashboard_model_connected">Series: %1$s • SAB connected</string>
+    <string name="dashboard_telemetry_title">Cluster Projection Status</string>
+    <string name="dashboard_firmware_version">Firmware Version</string>
+    <string name="dashboard_switch_type">Switch Type</string>
+    <string name="dashboard_destination_id">Destination ID</string>
+    <string name="dashboard_no_media_playing">No Media Playing</string>
+    <string name="dashboard_ready_to_project_audio">Ready to project audio</string>
+    <string name="dashboard_disconnect_button">Disconnect from Motorcycle</string>
+
+    <!-- Dashboard Connection Progress -->
+    <string name="dashboard_connecting_title">Connecting…</string>
+    <string name="dashboard_step_negotiating_mtu">Negotiating packet size</string>
+    <string name="dashboard_step_establishing_security">Establishing the secure session</string>
+    <string name="dashboard_step_reading_vehicle_identity">Reading the motorcycle identity</string>
+    <string name="dashboard_step_arming_channels">Opening the notification channels</string>
+    <string name="dashboard_step_running_assignment">Assigning the handlebar controls</string>
+    <string name="dashboard_step_starting_adapters">Starting the system adapters</string>
+    <string name="dashboard_step_waiting_to_retry">Connection failed, trying again</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_subtitle">OpenSAB Configuration</string>
+
+    <string name="settings_category_connectivity">Connectivity &amp; Auto-Connect</string>
+    <string name="settings_auto_connect_title">Auto-Connect to Motorcycle</string>
+    <string name="settings_auto_connect_desc">Automatically starts connection when Honda Bluetooth link is detected</string>
+    <string name="settings_auto_disconnect_title">Auto-Disconnect on Shutdown</string>
+    <string name="settings_auto_disconnect_desc">Stops background foreground service when motorcycle link is lost</string>
+    <string name="settings_sab_mode_wait_title">Wait for the Cluster Screen</string>
+    <string name="settings_sab_mode_wait_desc">How long the app waits for the cluster to hand over its screen before saying it has not</string>
+    <string name="settings_reset_keys_title">Reset Session Keys</string>
+    <string name="settings_reset_keys_desc">Deletes the saved session keys. The bike may refuse to connect until its own pairing is reset</string>
+
+    <string name="settings_category_paired_vehicles">Paired Motorcycles (%1$d)</string>
+    <string name="settings_no_paired_vehicles">No motorcycles saved yet. Connect to a motorcycle to save its profile.</string>
+    <string name="settings_paired_vehicle_summary">%1$s • Series %2$s</string>
+
+    <string name="settings_category_display">Display &amp; Motorcycle Cluster</string>
+    <string name="settings_keep_screen_on_title">Keep Screen On While Riding</string>
+    <string name="settings_keep_screen_on_desc">Prevents phone screen from turning off when mounted on handlebar</string>
+    <string name="settings_show_on_lock_screen_title">Show Over Lock Screen</string>
+    <string name="settings_show_on_lock_screen_desc">Displays live dashboard without unlocking phone in handlebar mount</string>
+    <string name="settings_root_menu_title">Cluster menu</string>
+    <string name="settings_root_menu_summary">%1$d of %2$d shown</string>
+    <string name="settings_root_menu_desc">Order and visibility of the main menu</string>
+    <string name="root_menu_settings_desc">Hold ≡ and drag to reorder. Untick to hide.</string>
+    <string name="root_menu_settings_reset">Reset</string>
+    <string name="root_menu_settings_drag">Reorder %1$s</string>
+    <string name="root_menu_settings_move_up">Move up</string>
+    <string name="root_menu_settings_move_down">Move down</string>
+    <string name="settings_theme_title">Application Theme</string>
+    <string name="settings_theme_desc">Interface appearance mode</string>
+
+    <string name="settings_category_music">Music &amp; Media Integration</string>
+    <string name="settings_fav_music_player_title">Favorite Music Player</string>
+    <string name="settings_fav_music_player_desc">Target media player started when pressing SELECT on motorcycle</string>
+    <string name="settings_auto_resume_title">Auto-Resume Playback</string>
+    <string name="settings_auto_resume_desc">Automatically resumes media playback when connecting to motorcycle</string>
+    <string name="settings_handlebar_volume_title">Handlebar Volume Control</string>
+    <string name="settings_handlebar_volume_desc">Allows handlebar volume buttons to adjust media stream volume</string>
+    <string name="settings_mute_action_title">Mute action</string>
+    <string name="settings_mute_action_desc">Handlebar mute button behavior</string>
+    <string name="settings_mute_action_pause_label">Pause music</string>
+    <string name="settings_mute_action_all_label">Mute all</string>
+    <string name="settings_cold_start_test_title">Test Headless Launch (5s)</string>
+    <string name="settings_cold_start_test_desc">5-second countdown to turn off screen and test pocket cold start</string>
+    <string name="settings_cold_start_countdown_running">Launching in %1$ds… Lock screen now</string>
+    <string name="settings_cold_start_content_title">Play on start-up</string>
+    <string name="settings_cold_start_content_desc">Pick what the favourite player starts with</string>
+    <string name="settings_cold_start_content_none">Whatever the player suggests</string>
+    <string name="settings_cold_start_pin_here">Pin this</string>
+    <string name="settings_cold_start_picker_empty">Nothing here</string>
+    <string name="settings_cold_start_picker_root">Home</string>
+    <string name="settings_cold_start_picker_back">Back</string>
+    <string name="settings_cold_start_picker_pinned">Pinned right now</string>
+    <string name="settings_cold_start_picker_failed">This player did not allow its library to be read</string>
+    <string name="settings_cold_start_content_blocked">%1$s does not let other apps browse its library</string>
+
+    <string name="settings_category_navigation">Navigation &amp; GPS (Turn-by-Turn)</string>
+    <string name="settings_intercept_gps_title">Intercept GPS Notifications</string>
+    <string name="settings_intercept_gps_desc">Reads Google Maps turn-by-turn directions for the cluster</string>
+
+    <string name="settings_category_messages">Messages</string>
+    <string name="settings_inbound_messages_title">Incoming Messages</string>
+    <string name="settings_inbound_messages_prompt">Prompt</string>
+    <string name="settings_inbound_messages_prompt_desc">Asks with sender name before reading the message out loud</string>
+    <string name="settings_inbound_messages_read">Read</string>
+    <string name="settings_inbound_messages_read_desc">Immediately displays and reads the message text out loud</string>
+    <string name="settings_inbound_messages_ignore">Ignore</string>
+    <string name="settings_inbound_messages_ignore_desc">Does not interrupt the screen; indicator lights up and message remains in carousel</string>
+    <string name="settings_quick_replies_title">Quick Replies</string>
+    <string name="settings_quick_replies_desc">The fixed answers offered on the cluster when talking is not an option</string>
+    <string name="settings_quick_replies_hint">Reply %1$d</string>
+    <string name="settings_quick_replies_empty">Using the defaults</string>
+    <string name="settings_reply_linger_title">Keep Sent on Screen</string>
+    <string name="settings_reply_linger_desc">How long the cluster shows Sent before giving the screen back</string>
+    <string name="settings_tunable_value_seconds">%1$d s</string>
+    <string name="settings_tunable_value_minutes">%1$d min</string>
+    <string name="settings_category_weather">Weather</string>
+    <string name="settings_temperature_unit_title">Temperature Unit</string>
+    <string name="settings_temperature_unit_desc">Scale for the weather page and the carousel entry</string>
+    <string name="settings_weather_refresh_title">Weather Check Interval</string>
+    <string name="settings_weather_refresh_desc">How often the app checks whether to fetch the forecast again, which it does after 5 km or 45 minutes. Applies from the next connection</string>
+
+    <string name="settings_category_calls">Calls &amp; Telephony</string>
+    <string name="settings_inbound_calls_title">Incoming Calls</string>
+    <string name="settings_inbound_calls_alert">Alert</string>
+    <string name="settings_inbound_calls_alert_desc">Shows caller on cluster screen and rings through audio</string>
+    <string name="settings_inbound_calls_ignore">Ignore</string>
+    <string name="settings_inbound_calls_ignore_desc">Does not interrupt the screen; phone indicator lights up and call remains in carousel</string>
+    <string name="settings_intercept_calls_title">Intercept Incoming Calls</string>
+
+    <string name="settings_category_sound_cues">Sound Cues</string>
+    <string name="settings_sound_cues_title">Sound cues</string>
+    <string name="settings_sound_cues_desc">Short tones for moving, entering a page and whether an action went through</string>
+    <string name="settings_mode_off">Off</string>
+    <string name="settings_mode_on">On</string>
+
+    <string name="settings_category_voice">Voice Guidance</string>
+    <string name="settings_voice_verbosity_title">Voice verbosity</string>
+    <string name="settings_voice_verbosity_none_label">None</string>
+    <string name="settings_voice_verbosity_none_desc">Completely silent. Sound cues still play if enabled</string>
+    <string name="settings_voice_verbosity_standard_label">Standard</string>
+    <string name="settings_voice_verbosity_standard_desc">Essential information only (calls, messages, weather)</string>
+    <string name="settings_voice_verbosity_advanced_label">Advanced</string>
+    <string name="settings_voice_verbosity_advanced_desc">Essential info plus contextual handlebar button help</string>
+
+    <string name="settings_category_time">Time Server (CTS 0x1805)</string>
+    <string name="settings_cts_sync_title">Motorcycle Clock Synchronization</string>
+    <string name="settings_cts_sync_desc">Hosts GATT Current Time Service to synchronize motorcycle cluster clock</string>
+
+    <string name="settings_category_journal">Session log</string>
+    <string name="settings_journal_limit_title">Storage limit</string>
+    <string name="settings_journal_limit_option">%1$d MB</string>
+    <string name="settings_journal_usage">%1$s / %2$d MB</string>
+    <string name="settings_journal_usage_over">%1$s / %2$d MB — trimmed when the session closes</string>
+    <string name="settings_journal_open">View sessions</string>
+
+    <string name="sessions_title">Sessions</string>
+    <string name="sessions_only_attention">Only with ⚠</string>
+    <string name="sessions_share_all">Share all</string>
+    <string name="sessions_share_selected">Share</string>
+    <string name="sessions_share_this">Share this session</string>
+    <string name="sessions_privacy_title">Before sharing</string>
+    <string name="sessions_privacy_body">The log includes names, numbers and message texts.</string>
+    <string name="sessions_privacy_confirm">Share</string>
+    <string name="sessions_export_failed">Could not build the file</string>
+    <string name="sessions_empty">No sessions yet</string>
+    <string name="sessions_open">In progress</string>
+    <string name="sessions_summary_failed">Summary failed: %1$s</string>
+    <string name="sessions_line">%1$d frames · %2$d rejected · %3$s · %4$s</string>
+    <string name="sessions_screen_after">screen in %1$s s</string>
+    <string name="sessions_screen_never">no screen</string>
+    <plurals name="sessions_calls">
+        <item quantity="one">%d call</item>
+        <item quantity="other">%d calls</item>
+    </plurals>
+    <plurals name="sessions_attempts">
+        <item quantity="one">%d attempt without connecting</item>
+        <item quantity="other">%d attempts without connecting</item>
+    </plurals>
+    <string name="sessions_duration">%1$d min</string>
+
+    <string name="settings_category_about">Diagnostics &amp; About</string>
+    <string name="settings_verbose_logging_title">Verbose Protocol Logging</string>
+    <string name="settings_verbose_logging_desc">Writes every frame sent to the bike, byte by byte, to the debug log. On by default in debug builds</string>
+    <string name="settings_sab_mode_rerequest_title">Ask Again on Every HU_MODE</string>
+    <string name="settings_sab_mode_rerequest_desc">Experimental. While connecting, asks the cluster for the screen again each time it reports its own mode, until it hands the screen over or 5 seconds pass. Applies from the next connection</string>
+    <string name="settings_project_without_grant_title">Project Without Confirmation</string>
+    <string name="settings_project_without_grant_desc">Experimental. If the cluster has not confirmed the handover 5 seconds after connecting, sends the screens anyway. What this app shows may not match the cluster. Applies from the next connection</string>
+    <string name="settings_app_version_title">OpenSAB Version</string>
+    <string name="settings_app_version_desc">0.1.0-preview (Open Source Honda SAB)</string>
+    <string name="settings_clean_room_badge">Clean-Room</string>
+    <string name="settings_reset_all_title">Reset All Settings</string>
+    <string name="settings_reset_all_desc">Restores all preferences to initial defaults</string>
+
+    <!-- Settings Confirmations -->
+    <string name="settings_toast_vehicle_forgotten">Motorcycle forgotten</string>
+    <string name="settings_toast_vehicle_saved">Motorcycle saved</string>
+    <string name="settings_toast_session_keys_reset">Session keys reset</string>
+    <string name="settings_toast_settings_reset">Settings reset to defaults</string>
+
+    <!-- Dialogs & Actions -->
+    <string name="dialog_forget_vehicle_title">Forget Motorcycle?</string>
+    <string name="dialog_forget_vehicle_desc">Are you sure you want to delete profile for %1$s (%2$s)? You will need to pair again.</string>
+    <string name="dialog_action_forget">Forget</string>
+    <string name="dialog_reset_keys_title">Reset Session Keys?</string>
+    <string name="dialog_reset_keys_desc">This deletes the session keys saved for every bike. A new key exchange only happens if the bike asks for one: if it still holds its side of the key, it may refuse to connect until its own pairing is reset.</string>
+    <string name="dialog_action_reset_keys">Reset Keys</string>
+    <string name="dialog_reset_defaults_title">Reset to Defaults?</string>
+    <string name="dialog_reset_defaults_desc">This will reset all application preferences back to their factory default values.</string>
+    <string name="dialog_action_reset_all">Reset All</string>
+    <string name="dialog_action_save">Save</string>
+    <string name="dialog_action_cancel">Cancel</string>
+    <string name="dialog_action_close">Close</string>
+
+    <!-- Vehicle profile -->
+    <string name="vehicle_profile_title">Motorcycle profile</string>
+    <string name="vehicle_profile_name">Name</string>
+    <string name="vehicle_profile_body_style">Type</string>
+    <string name="vehicle_profile_cluster">Cluster</string>
+    <string name="vehicle_profile_cluster_color">Colour</string>
+    <string name="vehicle_profile_cluster_segment">Segments</string>
+    <string name="vehicle_profile_cluster_help">If the cluster shows no colours, choose Segments. It applies on the next connection.</string>
+    <string name="body_style_generic">Generic</string>
+    <string name="body_style_naked">Naked</string>
+    <string name="body_style_sport">Sport</string>
+    <string name="body_style_adventure">Adventure</string>
+    <string name="body_style_touring">Touring</string>
+    <string name="body_style_custom">Custom</string>
+    <string name="body_style_scooter">Scooter</string>
+
+    <!-- Pairing: the cluster question -->
+    <string name="pairing_cluster_question_title">Does your cluster show colours?</string>
+    <string name="pairing_cluster_color">Yes, colour</string>
+    <string name="pairing_cluster_segment">No, it has segments</string>
+    <string name="pairing_cluster_help">You can change it later in Settings</string>
+
+    <!-- Enums Labels & Descriptions -->
+    <string name="unit_celsius_label">Celsius</string>
+    <string name="unit_fahrenheit_label">Fahrenheit</string>
+
+    <string name="theme_system_label">System Default</string>
+    <string name="theme_dark_label">Dark Theme (Recommended)</string>
+    <string name="theme_light_label">Light Theme</string>
+
+    <!-- Foreground Service & Notifications -->
+    <string name="notification_channel_name">OpenSAB Motorcycle Link</string>
+    <string name="notification_channel_desc">Shows permanent connection status with your motorcycle</string>
+    <string name="notification_connecting_text">Connecting to motorcycle…</string>
+    <string name="notification_connected_text">Connected to Honda Motorcycle</string>
+    <string name="notification_title">OpenSAB Connected</string>
+
+    <!-- Content Descriptions for Accessibility -->
+    <string name="cd_settings">Settings</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_dismiss">Dismiss</string>
+    <string name="cd_sab_compatible">SAB Compatible</string>
+    <string name="cd_cancel_pairing">Cancel pairing</string>
+    <string name="cd_forget_motorcycle">Forget Motorcycle</string>
+    <string name="dashboard_cluster">Cluster</string>
+
+    <!-- Dashboard mirror: action labels, one per MirrorActionToken -->
+    <string name="mirror_action_carousel_previous">Previous</string>
+    <string name="mirror_action_carousel_next">Next</string>
+    <string name="mirror_action_open">Open</string>
+    <string name="mirror_action_go_back">Back</string>
+    <string name="mirror_action_open_root_menu">Menu</string>
+    <string name="mirror_action_play">Play</string>
+    <string name="mirror_action_pause">Pause</string>
+    <string name="mirror_action_next_track">Next track</string>
+    <string name="mirror_action_volume_up">Volume up</string>
+    <string name="mirror_action_volume_down">Volume down</string>
+    <string name="mirror_action_volume_mute">Mute</string>
+    <string name="mirror_action_accept_call">Answer</string>
+    <string name="mirror_action_reject_call">Decline</string>
+    <string name="mirror_action_hang_up">Hang up</string>
+    <string name="mirror_action_place_call">Call</string>
+    <string name="mirror_action_retry_call">Try again</string>
+    <string name="mirror_action_repeat_maneuver">Repeat</string>
+    <string name="mirror_action_repeat_forecast">Repeat forecast</string>
+    <string name="mirror_action_refresh_weather">Refresh</string>
+    <string name="mirror_action_read_message">Read</string>
+    <string name="mirror_action_send_message">Send</string>
+    <string name="mirror_action_retry_dictation">Retry</string>
+    <string name="mirror_action_reply_message">Reply</string>
+    <string name="mirror_action_quick_replies">Quick Replies</string>
+    <string name="mirror_action_cancel_dictation">Cancel</string>
+    <string name="mirror_action_dismiss_message">Dismiss</string>
+    <string name="mirror_action_dismiss">Dismiss</string>
+
+    <!-- Dashboard mirror: the four visual states of the card -->
+    <string name="mirror_state_idle_title">Mirror off</string>
+    <string name="mirror_state_idle_body">Connect to a motorcycle to mirror its cluster.</string>
+    <string name="mirror_state_cluster_owns_title">The cluster owns the screen</string>
+    <string name="mirror_state_cluster_owns_body">The native tachometer is showing. Ask for the screen to mirror and control it from here.</string>
+    <string name="mirror_state_grant_overdue_body">The cluster has not handed over its screen. Press the d-pad on the handlebar: that has released it before, and it dismisses a warning if the cluster is showing one. Then ask again.</string>
+    <string name="mirror_state_request_handover">Take the screen</string>
+    <string name="mirror_state_handover_pending">Waiting for the cluster…</string>
+    <string name="mirror_state_modal_active">The modal has the input; the page controls are inert.</string>
+    <string name="mirror_state_trail_separator"> › </string>
+
+    <!-- Dashboard mirror: fate of the last frame written to the cluster -->
+    <string name="mirror_delivery_in_flight">Sending…</string>
+    <string name="mirror_delivery_confirmed">Showing on the cluster</string>
+    <string name="mirror_delivery_handover_unconfirmed">Sent, but the cluster has not confirmed it handed over the screen</string>
+    <string name="mirror_delivery_rejected">Rejected (status %1$d, byte %2$s) — the cluster still shows the previous screen</string>
+    <string name="mirror_delivery_timed_out">No answer from the cluster — it may still show the previous screen</string>
+    <string name="mirror_delivery_error_position_unknown">unknown</string>
+
+    <!-- Dashboard mirror: content descriptions -->
+    <string name="cd_mirror_card">Mirror of the motorcycle cluster</string>
+    <string name="cd_mirror_action">%1$s. Sends the press to the cluster.</string>
+    <string name="cd_mirror_action_disabled">%1$s. Not available right now.</string>
+
+    <!-- Speech: one phrase per SpeechToken, resolved by the platform -->
+    <string name="speech_pause">.</string>
+    <string name="speech_weather_forecast_message">The weather in %1$s</string>
+    <string name="speech_weather_forecast_message_help">Press Select for forecast.</string>
+    <string name="speech_weather_forecast_line">In %1$s, %2$s, %3$s</string>
+    <string name="speech_weather_current_line">Now, %1$s, %2$s</string>
+    <string name="speech_message_read">%1$s</string>
+    <string name="speech_message_read_help">Press Select to reply. Press Back to dismiss.</string>
+    <string name="speech_message_prompt">Message from %1$s on %2$s. Shall I read it?</string>
+    <string name="speech_message_prompt_help">Press Select to listen. Press Back to dismiss.</string>
+    <string name="speech_message_confirm">%1$s</string>
+    <string name="speech_message_confirm_help">Press Select to send. Press Back to cancel.</string>
+    <string name="speech_message_prompt_short">Message from %1$s. Shall I read it?</string>
+    <string name="speech_call_confirm">%1$s</string>
+    <string name="speech_call_confirm_help">Press Select to call.</string>
+    <string name="speech_call_ringing">Call from %1$s</string>
+    <string name="speech_call_ringing_unknown">Incoming call</string>
+    <string name="speech_call_ringing_help">Press Select to answer. Press Back to decline.</string>
+    <string name="speech_nav_confirm">%1$s</string>
+    <string name="speech_nav_confirm_help">Destination: %1$s. For accurate destinations include street and city. Press Select to navigate or Back to retry.</string>
+    <string name="speech_nav_maneuver">%1$s</string>
+
+    <!-- Carousel Speech -->
+    <string name="speech_root_weather">Weather, %1$s, %2$s</string>
+    <string name="speech_root_weather_help">Press Select to hear the forecast.</string>
+    <string name="speech_root_weather_empty">Weather, no data</string>
+    <string name="speech_root_weather_empty_help">Press Select to check it.</string>
+    <string name="speech_root_navigation">Navigation</string>
+    <string name="speech_root_navigation_help">Press Select to search for a destination.</string>
+    <string name="speech_root_navigation_guiding">Navigation, guiding</string>
+    <string name="speech_root_navigation_guiding_help">Press Select to repeat directions.</string>
+    <string name="speech_root_call">Phone</string>
+    <string name="speech_root_call_help">Press Select to make a call.</string>
+    <string name="speech_root_message_unread">Messages, message from %1$s</string>
+    <string name="speech_root_message_unread_help">Press Select to listen.</string>
+    <string name="speech_root_message">Messages</string>
+    <string name="speech_root_message_help">Press Select to compose a message.</string>
+    <string name="speech_root_music_playing">Music, playing %1$s</string>
+    <string name="speech_root_music_playing_help">Press Select for playback controls.</string>
+    <string name="speech_root_music">Music</string>
+    <string name="speech_root_music_help">Press Select to play.</string>
+    <string name="speech_root_volume">Volume</string>
+    <string name="speech_root_volume_help">Press Select to adjust.</string>
+
+    <!-- Submenu Speech -->
+    <string name="speech_menu_title">%1$s</string>
+    <string name="speech_call_menu_voice">Voice call</string>
+    <string name="speech_call_menu_voice_help">Press Select and say a name.</string>
+    <string name="speech_call_menu_voice_disabled">Voice call, unavailable</string>
+    <string name="speech_call_menu_favorites">Favorites</string>
+    <string name="speech_call_menu_favorites_help">Press Select to choose a contact.</string>
+    <string name="speech_call_menu_favorites_empty">Favorites, empty</string>
+    <string name="speech_message_menu_voice">Voice compose</string>
+    <string name="speech_message_menu_voice_help">Press Select and say who to write to.</string>
+    <string name="speech_message_menu_voice_disabled">Voice compose, unavailable</string>
+    <string name="speech_message_menu_favorites">Favorites</string>
+    <string name="speech_message_menu_favorites_help">Press Select to choose a contact.</string>
+    <string name="speech_message_menu_favorites_empty">Favorites, empty</string>
+    <string name="speech_nav_menu_voice">Voice search</string>
+    <string name="speech_nav_menu_voice_help">Press Select and say the destination.</string>
+
+    <!-- Music & Volume Speech -->
+    <string name="speech_music_live">Music player</string>
+    <string name="speech_music_live_help">Select, next song. Back, pause. Up and down, volume.</string>
+    <string name="speech_music_loading">Opening music</string>
+    <string name="speech_music_error">Music app is not responding</string>
+    <string name="speech_music_error_help">Press Back to exit.</string>
+    <string name="speech_volume_level">Volume, %1$s</string>
+    <string name="speech_volume_level_help">Up increases, down decreases.</string>
+    <string name="speech_volume_muted">Volume, muted</string>
+    <string name="speech_volume_muted_help">Up increases, down decreases.</string>
+
+    <!-- Voice Error/Result Pages Speech -->
+    <string name="speech_voice_nothing_understood">I didn\'t catch that</string>
+    <string name="speech_voice_nothing_understood_help">Press Back to retry.</string>
+    <string name="speech_nav_nothing_understood">I didn\'t catch that</string>
+    <string name="speech_nav_nothing_understood_help">Press Select to retry or Back to exit.</string>
+    <string name="speech_voice_failed">Could not listen</string>
+    <string name="speech_voice_failed_help">Press Back to retry.</string>
+    <string name="speech_voice_mic_needs_app">The microphone is off. Open OpenSAB on the phone to turn it on.</string>
+    <string name="speech_nav_failed_help">Press Select to retry or Back to exit.</string>
+    <string name="speech_voice_no_match">Could not find %1$s</string>
+    <string name="speech_voice_no_match_help">Press Back to retry.</string>
+    <string name="speech_call_not_placed">Could not call %1$s</string>
+    <string name="speech_call_not_placed_help">Press Back to retry.</string>
+    <string name="speech_message_choosing_reply">%1$s</string>
+    <string name="speech_message_choosing_reply_help">Press Select to send.</string>
+    <string name="speech_message_sent">Message sent</string>
+    <string name="speech_message_not_sent">Could not send message</string>
+    <string name="speech_message_not_sent_help">Press Select to retry.</string>
+    <string name="speech_reply_not_sent_help">Press Back to retry.</string>
+    <string name="speech_nav_no_app_available">No map app available</string>
+    <string name="speech_nav_no_app_available_help">Press Back to exit.</string>
+    <string name="speech_nav_ambiguous_query">Could not resolve destination</string>
+    <string name="speech_nav_ambiguous_query_help">Press Back to exit.</string>
+    <string name="speech_nav_unlock_phone">Unlock your phone to start the route</string>
+    <string name="speech_nav_unlock_phone_help">Press Back to exit.</string>
+
+    <!-- Speech: one word per SpeechWord, keyed on WeatherConditionType and not on the WMO caption -->
+    <string name="speech_word_weather_sunny">sunny</string>
+    <string name="speech_word_weather_clear">clear</string>
+    <string name="speech_word_weather_cloudy">cloudy</string>
+    <string name="speech_word_weather_sun_and_cloud">partly cloudy</string>
+    <string name="speech_word_weather_rain">rain</string>
+    <string name="speech_word_weather_storm">storm</string>
+    <string name="speech_word_weather_snow">snow</string>
+    <string name="speech_word_weather_fog">fog</string>
+    <string name="speech_word_weather_unknown">unknown weather</string>
+    <string name="speech_word_nav_straight">continue straight</string>
+    <string name="speech_word_nav_turn_slight_left">bear left</string>
+    <string name="speech_word_nav_turn_left">turn left</string>
+    <string name="speech_word_nav_turn_sharp_left">turn sharp left</string>
+    <string name="speech_word_nav_turn_slight_right">bear right</string>
+    <string name="speech_word_nav_turn_right">turn right</string>
+    <string name="speech_word_nav_turn_sharp_right">turn sharp right</string>
+    <string name="speech_word_nav_uturn">make a U-turn</string>
+    <string name="speech_word_nav_roundabout">at the roundabout</string>
+    <string name="speech_word_nav_destination">you have arrived</string>
+    <string name="speech_word_menu_phone">Phone</string>
+    <string name="speech_word_menu_messages">Messages</string>
+    <string name="speech_word_menu_navigation">Navigation</string>
+
+    <!-- Speech: one plural per SpeechQuantity. The unit is not spoken: the rider chose the scale and just read it -->
+    <plurals name="speech_quantity_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="speech_quantity_degrees">
+        <item quantity="one">%d degree</item>
+        <item quantity="other">%d degrees</item>
+    </plurals>
+    <plurals name="speech_quantity_percent">
+        <item quantity="one">%d percent</item>
+        <item quantity="other">%d percent</item>
+    </plurals>
+
+    <!-- The four the app ships when the rider has not written his own. Translated,
+         because they are the only words of the reply page that leave the phone. -->
+    <string-array name="default_quick_replies">
+        <item>On my way</item>
+        <item>Can\'t talk now</item>
+        <item>OK</item>
+        <item>Call you later</item>
+    </string-array>
+
+    <!--
+      The cluster's own words. Forty strings the instrument cluster paints,
+      resolved by ClusterPhrases.kt below the engine's seam. None of them takes an argument, and
+      every one of them has to fit 30 UTF-8 bytes: ProjectionBuffer truncates in silence.
+      everyClusterTokenIsTranslated and everyClusterStringFitsItsSlot hold both halves.
+    -->
+    <string name="cluster_header_weather">Weather</string>
+    <string name="cluster_header_navigation">Navigation</string>
+    <string name="cluster_header_phone">Phone</string>
+    <string name="cluster_header_messages">Messages</string>
+    <string name="cluster_header_music">Music</string>
+    <string name="cluster_header_volume">Volume</string>
+    <string name="cluster_header_nav_short">Nav</string>
+    <string name="cluster_empty_call">No Call</string>
+    <string name="cluster_empty_data">No Data</string>
+    <string name="cluster_empty_messages">No Messages</string>
+    <string name="cluster_empty_navigation">No Navigation</string>
+    <string name="cluster_call_ringing">Ringing</string>
+    <string name="cluster_call_in_call">In Call</string>
+    <string name="cluster_call_ended">Ended</string>
+    <string name="cluster_call_calling">Calling...</string>
+    <string name="cluster_call_failed">Call failed</string>
+    <string name="cluster_dial_say_a_name">Say a name</string>
+    <string name="cluster_dial_not_in_contacts">Not in contacts</string>
+    <string name="cluster_phone_kind_mobile">Mobile</string>
+    <string name="cluster_phone_kind_home">Home</string>
+    <string name="cluster_phone_kind_work">Work</string>
+    <string name="cluster_phone_kind_main">Main</string>
+    <string name="cluster_phone_kind_other">Other</string>
+    <string name="cluster_call_menu_by_voice">By voice</string>
+    <string name="cluster_call_menu_favorites">Favorites</string>
+    <string name="cluster_message_menu_by_voice">By voice</string>
+    <string name="cluster_message_menu_favorites">Favorites</string>
+    <string name="cluster_reply_say_your_message">Say your message</string>
+    <string name="cluster_reply_sending">Sending...</string>
+    <string name="cluster_reply_sent">Sent</string>
+    <string name="cluster_reply_not_sent">Not sent</string>
+    <string name="cluster_volume_mute">Mute</string>
+    <string name="cluster_nav_menu_voice_search">Voice Search</string>
+    <string name="cluster_nav_voice_listening">Listening...</string>
+    <string name="cluster_nav_launching">Starting route...</string>
+    <string name="cluster_nav_voice_nothing_understood">Nothing understood</string>
+    <string name="cluster_nav_voice_no_app">No navigation app</string>
+    <string name="cluster_nav_voice_ambiguous">Select on phone</string>
+    <string name="cluster_nav_voice_unlock_phone">Unlock your phone</string>
+    <string name="cluster_listen_nothing_understood">I didn\'t catch that</string>
+    <string name="cluster_listen_no_permission">Microphone denied</string>
+    <string name="cluster_listen_no_recognizer">No voice input</string>
+    <string name="cluster_listen_network">No network</string>
+    <string name="cluster_listen_audio">Microphone error</string>
+    <string name="cluster_listen_server">Voice service down</string>
+    <string name="cluster_listen_client">Voice input error</string>
+    <string name="cluster_listen_busy">Microphone busy</string>
+    <string name="cluster_listen_language">Language unsupported</string>
+    <string name="cluster_listen_unknown">Could not listen</string>
+    <string name="cluster_listen_open_app">Open OpenSAB for mic</string>
+    <string name="cluster_loading">Loading</string>
+    <string name="cluster_music_error">App Error</string>
+
+    <!--
+      The seventeen things the forecast can be called. They are
+      keyed by WmoCaption, which is persisted, so the name of a row here is on riders' phones:
+      renaming one is a cache migration and not an edit. Each shares the cluster's first line with
+      the temperature, so the budget is 30 UTF-8 bytes minus the 7 the longest prefix "-40°C "
+      takes: "Tormenta con granizo" spends 29 of the 30.
+    -->
+    <string name="cluster_weather_clear">Clear</string>
+    <string name="cluster_weather_mainly_clear">Mainly clear</string>
+    <string name="cluster_weather_partly_cloudy">Partly cloudy</string>
+    <string name="cluster_weather_overcast">Overcast</string>
+    <string name="cluster_weather_fog">Fog</string>
+    <string name="cluster_weather_rime_fog">Rime fog</string>
+    <string name="cluster_weather_drizzle">Drizzle</string>
+    <string name="cluster_weather_freezing_drizzle">Freezing drizzle</string>
+    <string name="cluster_weather_rain">Rain</string>
+    <string name="cluster_weather_freezing_rain">Freezing rain</string>
+    <string name="cluster_weather_snow">Snow</string>
+    <string name="cluster_weather_snow_grains">Snow grains</string>
+    <string name="cluster_weather_rain_showers">Rain showers</string>
+    <string name="cluster_weather_snow_showers">Snow showers</string>
+    <string name="cluster_weather_thunderstorm">Thunderstorm</string>
+    <string name="cluster_weather_thunderstorm_with_hail">Thunderstorm with hail</string>
+    <string name="cluster_weather_unknown">Unknown</string>
+</resources>

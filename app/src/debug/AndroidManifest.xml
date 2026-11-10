@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Headless cold start test harness (do not fire while connected to motorcycle):
+             adb shell am broadcast -p com.opensab -a com.opensab.debug.TRIGGER_PLAY -->
+        <receiver
+            android:name="com.opensab.app.source.music.MediaPlaybackDebugReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="com.opensab.debug.TRIGGER_PLAY" />
+                <action android:name="com.opensab.debug.SET_FAVORITE" />
+                <action android:name="com.opensab.debug.ATTACH" />
+                <action android:name="com.opensab.debug.DETACH" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Stores a paired vehicle without a motorcycle:
+             adb shell am broadcast -a com.opensab.debug.SEED_VEHICLE -p com.opensab -->
+        <receiver
+            android:name="com.opensab.app.debug.DebugVehicleSeedReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="com.opensab.debug.SEED_VEHICLE" />
+            </intent-filter>
+        </receiver>
+
+        <!-- A voice search's launch without a motorcycle; see DebugNavLaunchReceiver:
+             adb shell am broadcast -p com.opensab -a com.opensab.debug.NAV_LAUNCH, with the string
+             extra "query" set to the destination -->
+        <receiver
+            android:name="com.opensab.app.debug.DebugNavLaunchReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="com.opensab.debug.NAV_LAUNCH" />
+                <action android:name="com.opensab.debug.NAV_BACK" />
+            </intent-filter>
+        </receiver>
+
+        <!-- adb shell am start -n com.opensab/com.opensab.app.debug.DebugGalleryActivity, with the
+             string extra "screen" set to icons, cluster_question or profile_dialog -->
+        <activity
+            android:name="com.opensab.app.debug.DebugGalleryActivity"
+            android:exported="true"
+            android:permission="android.permission.DUMP"
+            android:theme="@style/Theme.OpenSAB" />
+    </application>
+
+</manifest>

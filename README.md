@@ -146,6 +146,12 @@ Design choices worth knowing:
 
 Signed APKs are attached to each [release](../../releases), with their SHA-256 checksum. There is no
 store listing. Android 8.0 or newer with Bluetooth Low Energy; no Google account, no Play Services.
+
+To get updates without checking by hand, add it to [Obtainium](https://github.com/ImranR98/Obtainium),
+which installs straight from these releases:
+
+[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="54">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/subenoeva/OpenSAB)
+
 Step by step, including the first launch and pairing, on the *Installing* page of the
 [wiki](../../wiki).
 

@@ -43,10 +43,11 @@ class AsciiFoldingTextSanitizer : TextSanitizer {
         val normalized = Normalizer.normalize(replaced, Normalizer.Form.NFD)
         val stripped = DIACRITICS.matcher(normalized).replaceAll("")
 
+        // By code point, not by char: a character outside the basic plane is two chars in Java.
         val ascii = buildString(stripped.length) {
-            for (ch in stripped) {
-                if (ch.code in 32..126 || ch == '\n' || ch == '\r' || ch == '\t') {
-                    append(ch)
+            stripped.codePoints().forEach { codePoint ->
+                if (codePoint in 32..126 || codePoint == '\n'.code || codePoint == '\r'.code || codePoint == '\t'.code) {
+                    appendCodePoint(codePoint)
                 } else {
                     append(fallbackChar)
                 }

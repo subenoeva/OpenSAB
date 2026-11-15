@@ -80,7 +80,7 @@ class WeatherPageProviderTest {
     @Test
     fun `renders standby screen when no weather data is available`() {
         val weatherSource = MockWeatherSource()
-        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource)
+        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource, volumeSource = null)
 
         val frame = provider.render(requestId = 302) as ProjectionFrame.LiveScreen
         assertEquals(302, frame.requestId)
@@ -99,7 +99,7 @@ class WeatherPageProviderTest {
     @Test
     fun `back button pops back to root menu`() {
         val weatherSource = MockWeatherSource()
-        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource)
+        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource, volumeSource = null)
 
         val action = provider.onInput(FunctionId.BACK)
         assertEquals(NavigationAction.Pop, action)
@@ -108,7 +108,7 @@ class WeatherPageProviderTest {
     @Test
     fun `menu button resets back to root menu`() {
         val weatherSource = MockWeatherSource()
-        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource)
+        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource, volumeSource = null)
 
         val action = provider.onInput(FunctionId.MENU)
         assertEquals(NavigationAction.Reset, action)
@@ -117,7 +117,7 @@ class WeatherPageProviderTest {
     @Test
     fun `select button requests weather refresh`() {
         val weatherSource = MockWeatherSource()
-        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource)
+        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource, volumeSource = null)
 
         val action = provider.onInput(FunctionId.SELECT)
         assertEquals(NavigationAction.None, action)
@@ -181,7 +181,8 @@ class WeatherPageProviderTest {
                 copy = englishClusterText,
                 captions = englishWeatherCaptions,
                 weatherSource = weatherSource,
-                nowMillis = { clockReads++; 0L }
+                nowMillis = { clockReads++; 0L },
+                volumeSource = null
             )
         }
 
@@ -203,7 +204,8 @@ class WeatherPageProviderTest {
             copy = englishClusterText,
             captions = englishWeatherCaptions,
             weatherSource = weatherSource,
-            nowMillis = { clockReads++; 0L }
+            nowMillis = { clockReads++; 0L },
+            volumeSource = null
         )
 
         provider.speech.first()
@@ -349,7 +351,7 @@ class WeatherPageProviderTest {
     @Test
     fun `retains state on resume`() {
         val weatherSource = MockWeatherSource()
-        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource)
+        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource, volumeSource = null)
 
         assertEquals(ResumeBehavior.RETAIN, provider.onResumeBehavior)
         assertEquals("WeatherPage", provider.name)
@@ -408,7 +410,7 @@ class WeatherPageProviderTest {
     @Test
     fun `mirror twins the projected frame instead of wording the page again`() {
         val weatherSource = MockWeatherSource()
-        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource)
+        val provider = WeatherPageProvider(weatherSource.currentWeather, englishClusterText, englishWeatherCaptions, weatherSource, volumeSource = null)
 
         weatherSource.updateWeather(
             WeatherInfo(
@@ -447,7 +449,9 @@ class WeatherPageProviderTest {
                 )
             ),
             copy = { "[${it.name}]" },
-            captions = { "Chubascos" }
+            captions = { "Chubascos" },
+            weatherSource = null,
+            volumeSource = null
         )
 
         val frame = page.render(1) as ProjectionFrame.LiveScreen
@@ -464,7 +468,9 @@ class WeatherPageProviderTest {
         val page = WeatherPageProvider(
             currentWeather = MutableStateFlow(null),
             copy = { "[${it.name}]" },
-            captions = { "no reading, no caption" }
+            captions = { "no reading, no caption" },
+            weatherSource = null,
+            volumeSource = null
         )
 
         val frame = page.render(1) as ProjectionFrame.LiveScreen
@@ -491,7 +497,9 @@ class WeatherPageProviderTest {
                 )
             ),
             copy = { "[${it.name}]" },
-            captions = { "[${it.name}]" }
+            captions = { "[${it.name}]" },
+            weatherSource = null,
+            volumeSource = null
         )
 
         val frame = page.render(1) as ProjectionFrame.LiveScreen

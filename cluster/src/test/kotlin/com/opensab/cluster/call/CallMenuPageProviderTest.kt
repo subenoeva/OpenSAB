@@ -278,6 +278,43 @@ class CallMenuPageProviderTest {
         job.cancel()
     }
 
+    /**
+     * The engine launches the redraw collector and [CallMenuPageProvider.work] side by side, so an
+     * address book read that does not suspend can land before the collector subscribes.
+     */
+    @Test
+    fun `should still redraw when the gates arrive before anyone is collecting`() = runTest {
+        val access = MockCallMenuAccess(CallMenuGates(voice = true, favorites = emptyList()))
+        val page = menuPage(access)
+
+        backgroundScope.launch { page.work() }
+        runCurrent()
+
+        val collected = mutableListOf<Unit>()
+        val job = backgroundScope.launch { page.invalidations.toList(collected) }
+        runCurrent()
+
+        assertEquals("the redraw waited for its collector", 1, collected.size)
+        job.cancel()
+    }
+
+    @Test
+    fun `should not redraw on a second mount that finds the same gates`() = runTest {
+        val access = MockCallMenuAccess(CallMenuGates(voice = true, favorites = emptyList()))
+        val page = menuPage(access)
+        val collected = mutableListOf<Unit>()
+        val job = backgroundScope.launch { page.invalidations.toList(collected) }
+        val first = backgroundScope.launch { page.work() }
+        runCurrent()
+        first.cancel()
+
+        backgroundScope.launch { page.work() }
+        runCurrent()
+
+        assertEquals("one redraw for the first read, none for the second", 1, collected.size)
+        job.cancel()
+    }
+
     @Test
     fun `should read the gates again the next time it is mounted`() = runTest {
         val access = MockCallMenuAccess(CallMenuGates(voice = true, favorites = emptyList()))

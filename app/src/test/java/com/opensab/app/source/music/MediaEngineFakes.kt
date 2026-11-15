@@ -37,6 +37,8 @@ class FakeMediaBrowserConnection : MediaBrowserConnection {
     var connectionCallback: MediaBrowserConnectionCallback? = null
     var rootItems: List<MediaBrowserItem> = emptyList()
     var childItems: MutableMap<String, List<MediaBrowserItem>> = mutableMapOf()
+    /** Parents whose subscription answers with an error instead of children. */
+    var failingParents: MutableSet<String> = mutableSetOf()
     var unsubscribedCategories: MutableSet<String> = mutableSetOf()
     var lastPlayedMediaId: String? = null
     var genericPlayCalled = false
@@ -66,7 +68,9 @@ class FakeMediaBrowserConnection : MediaBrowserConnection {
     }
 
     override fun subscribe(parentId: String, callback: MediaBrowserSubscriptionCallback) {
-        if (parentId == rootId || parentId == "root" || parentId.isEmpty()) {
+        if (parentId in failingParents) {
+            callback.onError(parentId)
+        } else if (parentId == rootId || parentId == "root" || parentId.isEmpty()) {
             callback.onChildrenLoaded(parentId, rootItems)
         } else {
             callback.onChildrenLoaded(parentId, childItems[parentId] ?: emptyList())

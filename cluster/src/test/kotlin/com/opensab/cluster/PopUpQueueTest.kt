@@ -42,4 +42,25 @@ class PopUpQueueTest {
 
         assertNull(queue.poll())
     }
+
+    /** Ties on priority go by arrival, also when the clock did not move between two posts. */
+    @Test
+    fun samePriorityPopUpsCreatedInTheSameMillisecondLeaveInArrivalOrder() {
+        val queue = PopUpQueue()
+        val ids = (1..8).map { "msg-$it" }
+
+        ids.forEach {
+            queue.enqueue(
+                QueuedPopUp(
+                    id = it,
+                    message = it,
+                    icon = IconId.INCOMING_MESSAGE,
+                    priority = PopUpPriority.SYSTEM_NOTIFICATION,
+                    createdAt = 1_000L
+                )
+            )
+        }
+
+        assertEquals(ids, generateSequence { queue.poll() }.map { it.id }.toList())
+    }
 }

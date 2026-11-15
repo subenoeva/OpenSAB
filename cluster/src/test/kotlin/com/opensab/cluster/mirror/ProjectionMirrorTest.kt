@@ -252,6 +252,33 @@ class ProjectionMirrorTest {
         )
     }
 
+    /**
+     * The status bar is written to the BTU whoever owns the screen, so the bits lit before the first
+     * page are the ones the cluster shows when it hands over. A mirror that mounted with none would
+     * disagree with it until the next bit moved.
+     */
+    @Test
+    fun `the first page mounts with the indicators lit before it`() {
+        for (mirror in listOf(ProjectionMirror(), ProjectionMirror().also { it.publishClusterOwnsScreen() })) {
+            mirror.publishIndicators(setOf(ActiveIndicator.MUSIC))
+
+            mirror.publishPage(page(), trail = listOf("RootMenu"))
+
+            assertEquals(setOf(ActiveIndicator.MUSIC), (mirror.state.value as MirrorState.Projecting).indicators)
+        }
+    }
+
+    @Test
+    fun `a page after clear starts with no indicators`() {
+        val mirror = ProjectionMirror()
+        mirror.publishIndicators(setOf(ActiveIndicator.MUSIC))
+        mirror.clear()
+
+        mirror.publishPage(page(), trail = listOf("RootMenu"))
+
+        assertEquals(emptySet<ActiveIndicator>(), (mirror.state.value as MirrorState.Projecting).indicators)
+    }
+
     @Test
     fun `clear returns to idle`() {
         val mirror = ProjectionMirror()

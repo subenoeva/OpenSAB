@@ -26,6 +26,13 @@ class ProjectionMirror {
     val state: StateFlow<MirrorState> = _state.asStateFlow()
 
     /**
+     * The status bar as last published, kept while no page is mounted: the BTU gets the mask whoever
+     * owns the screen, so the first page mounts with what the cluster already shows.
+     */
+    @Volatile
+    private var latestIndicators: Set<ActiveIndicator> = emptySet()
+
+    /**
      * The native tachometer owns the screen.
      *
      * Says **where the screen is**, not whether a request was answered: an outstanding
@@ -93,7 +100,7 @@ class ProjectionMirror {
                 page = page,
                 popUp = previous?.popUp,
                 trail = trail,
-                indicators = previous?.indicators ?: emptySet(),
+                indicators = previous?.indicators ?: latestIndicators,
                 delivery = MirrorDelivery.InFlight
             )
         }
@@ -110,12 +117,14 @@ class ProjectionMirror {
     }
 
     /** Replaces the whole status bar set; the cluster carries the mask as one field, not per bit. */
-    fun publishIndicators(indicators: Set<ActiveIndicator>) = updateProjecting("indicators") {
-        it.copy(indicators = indicators)
+    fun publishIndicators(indicators: Set<ActiveIndicator>) {
+        latestIndicators = indicators
+        updateProjecting("indicators") { it.copy(indicators = indicators) }
     }
 
     /** No session, or the engine stopped. */
     fun clear() {
+        latestIndicators = emptySet()
         _state.value = MirrorState.Idle
     }
 

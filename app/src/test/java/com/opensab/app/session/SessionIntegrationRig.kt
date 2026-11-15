@@ -1,6 +1,8 @@
 package com.opensab.app.session
 
+import com.opensab.cluster.NoInterruptions
 import com.opensab.app.di.OrchestratorModule
+import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.app.source.music.InMemoryFavoriteMediaRepository
 import com.opensab.cluster.BaseStateManager
 import com.opensab.cluster.ClusterHandoverCoordinator
@@ -99,7 +101,7 @@ internal fun TestScope.sessionIntegrationRig(
     val indicators = ActiveIndicatorsPublisher(projector)
     val musicManager = DefaultMusicManager(MockMediaControllerAdapter())
     val navManager = DefaultNavigationManager(NavigationNotificationBus())
-    val callManager = DefaultCallManager(CallNotificationBus())
+    val callManager = DefaultCallManager(CallNotificationBus(), NoAudioFocus)
     val baseStateManager = BaseStateManager(
         screenProjector = projector,
         requestIdGenerator = requestIdGenerator,
@@ -111,14 +113,24 @@ internal fun TestScope.sessionIntegrationRig(
                 entries = allRootMenuEntries(),
                 pageFactory = { item ->
                     if (item == RootMenuItem.MUSIC) {
-                        MusicPageProvider(musicManager.currentState, englishClusterText, volumeControlOn)
+                        MusicPageProvider(musicManager.currentState, englishClusterText, volumeControlOn, musicManager = null)
                     } else {
                         StubPageProvider("stub", ProjectionFrame.RequestSabMode(1))
                     }
                 },
-                copy = englishClusterText
+                copy = englishClusterText,
+                musicState = null,
+                navInstruction = null,
+                activeCall = null,
+                currentWeather = null,
+                currentMessage = null,
+                musicLoadingPageFactory = null,
+                messageMenuPageFactory = null
             )
-        }
+        },
+        interruptSource = NoInterruptions,
+        pageVoice = null,
+        cuePlayer = NoCuePlayer
     )
 
     val liveLinkHolder = LiveSessionLinkHolder()

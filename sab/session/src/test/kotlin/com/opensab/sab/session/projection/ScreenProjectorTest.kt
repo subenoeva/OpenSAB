@@ -580,6 +580,50 @@ class ScreenProjectorTest {
         projector.stop()
     }
 
+    /**
+     * A popup posted while a base frame waits for its Receipt covers that frame on the cluster. The
+     * base that returns afterwards must not record itself as shown, or the same base written once
+     * the popup is gone is skipped and the cluster stays on whatever the popup left behind.
+     */
+    @Test
+    fun shouldWriteTheSameBaseFrameAgainWhenAPopUpCameInWhileItWasInFlight() = testScope.runTest {
+        val transport = MockGattTransport()
+        transport.connect()
+        val writes = mutableListOf<ByteArray>()
+        transport.onCharacteristicWrite = { uuid, payload ->
+            if (uuid == SabGattUuids.CHAR_DATA_COMM_COMMAND) writes += payload.copyOf()
+        }
+        suspend fun ackLast() {
+            val last = writes.last()
+            transport.emitNotification(
+                SabGattUuids.SERVICE_DATA_COMM,
+                SabGattUuids.CHAR_DATA_COMM_CONTROL_POINT,
+                byteArrayOf(last[0], last[1], 0x00)
+            )
+        }
+        val projector = startedProjector(transport, MutableStateFlow(DashboardMode.SAB_MODE))
+
+        val base = launch { projector.updateBaseScreen(TestFrames.music(1, "Music", title = "A", artist = "B", playing = true)) }
+        runCurrent()
+        val popUp = launch { projector.postPopUp(QueuedPopUp(id = "p", message = "Hi", icon = IconId.INCOMING_CALL)) }
+        runCurrent()
+        ackLast()
+        runCurrent()
+        ackLast()
+        runCurrent()
+        base.join()
+        popUp.join()
+
+        val again = launch { projector.updateBaseScreen(TestFrames.music(2, "Music", title = "A", artist = "B", playing = true)) }
+        runCurrent()
+
+        assertEquals("the repeat of the covered base has to reach the wire", 2, writes.last()[1].toInt())
+        ackLast()
+        runCurrent()
+        again.join()
+        projector.stop()
+    }
+
     @Test
     fun shouldWriteTheSameBaseFrameAgainAfterTheBtuRejectedIt() = testScope.runTest {
         val transport = MockGattTransport()

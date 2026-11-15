@@ -46,6 +46,9 @@ class PopupManager(
     private var scope: CoroutineScope? = null
     private var expiryJob: Job? = null
 
+    /** One switch-off per degraded bit: a popup for another bit must not cancel this one's. */
+    private val degradedExpiryJobs = mutableMapOf<ActiveIndicator, Job>()
+
     fun start(scope: CoroutineScope) {
         this.scope = scope
     }
@@ -79,11 +82,11 @@ class PopupManager(
         Log.d("PopUp %s degraded to indicator %s", popUp.id, indicator)
         activeIndicators.set(indicator, enabled = true)
 
-        expiryJob?.cancel()
-        expiryJob = scope?.launch {
+        degradedExpiryJobs.remove(indicator)?.cancel()
+        scope?.launch {
             delay(popUp.duration)
             activeIndicators.set(indicator, enabled = false)
-        }
+        }?.let { degradedExpiryJobs[indicator] = it }
     }
 
     /**
@@ -142,6 +145,8 @@ class PopupManager(
         activePopUp = null
         expiryJob?.cancel()
         expiryJob = null
+        degradedExpiryJobs.values.forEach { it.cancel() }
+        degradedExpiryJobs.clear()
         scope = null
         queue.clear()
     }

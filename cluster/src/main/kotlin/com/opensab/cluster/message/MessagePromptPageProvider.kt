@@ -44,8 +44,8 @@ import kotlinx.coroutines.flow.onEach
 class MessagePromptPageProvider(
     private val currentMessage: StateFlow<MessageInfo?>,
     private val copy: ClusterTextResolver,
-    private val messageSource: MessageSource? = null,
-    private val volumeSource: VolumeSource? = null,
+    private val messageSource: MessageSource?,
+    private val volumeSource: VolumeSource?,
     readPageFactory: () -> PageProvider
 ) : SpeakingPage {
 

@@ -83,28 +83,30 @@ class PageProviderInvalidationContractTest {
                     currentWeather = rootWeather,
                     currentMessage = rootMessage,
                     pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-                    copy = englishClusterText
+                    copy = englishClusterText,
+                    musicLoadingPageFactory = null,
+                    messageMenuPageFactory = null
                 )
             ) { rootMusic.value = rootMusic.value.copy(status = PlaybackStatus.PLAYING) },
             Scenario(
                 "Music",
-                MusicPageProvider(musicState, englishClusterText, volumeControlOn)
+                MusicPageProvider(musicState, englishClusterText, volumeControlOn, musicManager = null)
             ) { musicState.value = musicState.value.copy(status = PlaybackStatus.PLAYING) },
             Scenario(
                 "Volume",
-                VolumePageProvider(volumeLevel, englishClusterText, volumeControlOn)
+                VolumePageProvider(volumeLevel, englishClusterText, volumeControlOn, volumeSource = null)
             ) { volumeLevel.value = volumeLevel.value.copy(percent = 10) },
             Scenario(
                 "Navigation",
-                NavigationPageProvider(navState, englishClusterText)
+                NavigationPageProvider(navState, englishClusterText, navigationManager = null, volumeSource = null)
             ) { navState.value = NavInstruction("", "", "", com.opensab.domain.nav.ManeuverType.STRAIGHT) },
             Scenario(
                 "Call",
-                CallPageProvider(callState, englishClusterText)
+                CallPageProvider(callState, englishClusterText, telecomAdapter = null, volumeSource = null)
             ) { callState.value = CallInfo("123", "John", com.opensab.domain.call.CallStatus.RINGING) },
             Scenario(
                 "Weather",
-                WeatherPageProvider(weatherState, englishClusterText, englishWeatherCaptions)
+                WeatherPageProvider(weatherState, englishClusterText, englishWeatherCaptions, weatherSource = null, volumeSource = null)
             ) {
                 weatherState.value = WeatherInfo(
                     locationName = "Valencia",
@@ -116,7 +118,7 @@ class PageProviderInvalidationContractTest {
             },
             Scenario(
                 "Message",
-                MessagePageProvider(messageState, englishClusterText)
+                MessagePageProvider(messageState, englishClusterText, messageSource = null, canReply = MutableStateFlow(false), volumeSource = null)
             ) { messageState.value = MessageInfo("John", "Hello") }
         )
     }
@@ -149,7 +151,9 @@ class PageProviderInvalidationContractTest {
             recognizer = recognizer,
             messageSource = MockMessageSource(),
             sentLinger = MutableStateFlow(2.seconds),
-            copy = englishClusterText
+            copy = englishClusterText,
+            quickReplies = MutableStateFlow(emptyList()),
+            volumeSource = null
         )
         val collected = mutableListOf<Unit>()
         val redraws = launch { page.invalidations.toList(collected) }
@@ -184,7 +188,8 @@ class PageProviderInvalidationContractTest {
             dialer = MockCallDialer(),
             livePageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
             copy = englishClusterText,
-            activeCall = MutableStateFlow<CallInfo?>(null)
+            activeCall = MutableStateFlow<CallInfo?>(null),
+            volumeSource = null
         )
         val collected = mutableListOf<Unit>()
         val redraws = launch { page.invalidations.toList(collected) }
@@ -228,7 +233,8 @@ class PageProviderInvalidationContractTest {
             unlockSource = FakeDeviceUnlockSource(),
             navInstructionFlow = MutableStateFlow(null),
             livePageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = englishClusterText
+            copy = englishClusterText,
+            volumeSource = null
         )
         val collected = mutableListOf<Unit>()
         val redraws = launch { page.invalidations.toList(collected) }

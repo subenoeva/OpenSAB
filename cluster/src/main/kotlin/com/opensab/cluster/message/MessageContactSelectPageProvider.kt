@@ -81,7 +81,7 @@ internal class MessageContactSelectPageProvider(
     private val directory: ContactDirectory,
     private val composePageFactory: (CallTarget) -> PageProvider,
     private val copy: ClusterTextResolver,
-    private val volumeSource: VolumeSource? = null
+    private val volumeSource: VolumeSource?
 ) : SpeakingPage, WorkingPage, CuingPage {
 
     init {

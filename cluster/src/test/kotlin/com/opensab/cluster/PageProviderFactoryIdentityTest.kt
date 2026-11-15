@@ -1,5 +1,6 @@
 package com.opensab.cluster
 import com.opensab.cluster.music.volumeControlOn
+import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.cluster.text.englishPresentation
 import com.opensab.domain.call.CallNotificationBus
 import com.opensab.domain.call.CallNotificationDriver
@@ -46,7 +47,7 @@ class PageProviderFactoryIdentityTest {
     private val navManager = RecordingNavigationManager()
     private val callBus = CallNotificationBus()
     private val callDriver = CallNotificationDriver(callBus)
-    private val callManager = DefaultCallManager(callBus)
+    private val callManager = DefaultCallManager(callBus, NoAudioFocus)
     private val weatherSource = MockWeatherSource()
     private val messageSource = MockMessageSource()
     private val telecomAdapter = RecordingTelecomAdapter()

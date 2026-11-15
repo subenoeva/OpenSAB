@@ -187,13 +187,6 @@ class SharedRequestIdWiringTest {
             transport: GattTransport
         ): Result<SecuritySession> =
             Result.success(SecuritySession(macAddress, ByteArray(16)))
-
-        override suspend fun validateExistingKey(
-            macAddress: String,
-            transport: GattTransport,
-            existingKey: ByteArray
-        ): Result<SecuritySession> =
-            Result.success(SecuritySession(macAddress, existingKey))
     }
 
     private class FakeVehicleInfoReader : VehicleInfoReader {

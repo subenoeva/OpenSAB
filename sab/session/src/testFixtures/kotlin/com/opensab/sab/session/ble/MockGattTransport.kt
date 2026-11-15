@@ -13,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 class MockGattTransport(
     private val operationQueue: SerializedGattQueue = SerializedGattQueue(),
-    var onCharacteristicWrite: (suspend (UUID, ByteArray) -> Unit)? = null
+    var onCharacteristicWrite: (suspend (UUID, ByteArray) -> Unit)? = null,
+    /** Runs before each read, so a test can change what the next read returns. */
+    var onCharacteristicRead: ((UUID) -> Unit)? = null
 ) : GattTransport {
 
     private val _connectionState = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
@@ -63,6 +65,7 @@ class MockGattTransport(
         if (_connectionState.value !is BleConnectionState.Connected) {
             throw BleDisconnectedException("Cannot read: transport is not connected")
         }
+        onCharacteristicRead?.invoke(characteristicUuid)
         characteristicStore[characteristicUuid]?.clone()
             ?: throw GattCharacteristicNotFoundException(characteristicUuid)
     }

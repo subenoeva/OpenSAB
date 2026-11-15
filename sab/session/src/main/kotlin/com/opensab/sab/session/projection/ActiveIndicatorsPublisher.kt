@@ -33,6 +33,14 @@ class ActiveIndicatorsPublisher(
     private var lastMask: Int = 0
 
     /**
+     * The mask the cluster acknowledged last, or `null` when a write failed and what it shows is not
+     * known. Only a mask equal to this one is skipped, so a failed write is repaired on the next
+     * publish even when nothing changed in between. Written by [set] under [writeOrder]; [clear]
+     * resets it.
+     */
+    private var projected: Int? = 0
+
+    /**
      * Holds computing and writing together as one operation.
      *
      * A `Mutex` rather than the `synchronized` block below because [set] suspends across the write,
@@ -61,18 +69,18 @@ class ActiveIndicatorsPublisher(
             val mask = synchronized(active) {
                 if (enabled) active += indicator else active -= indicator
                 val next = ActiveIndicator.maskOf(active)
-                if (next == lastMask) {
-                    null
-                } else {
+                if (next != lastMask) {
                     lastMask = next
                     _state.value = active.toSet()
-                    next
                 }
+                next.takeIf { it != projected }
             } ?: return@withLock
 
             Log.d("Active indicators changed to 0x%02X (%s)", mask, active)
-            screenProjector.updateActiveIndicators(mask)
+            projected = screenProjector.updateActiveIndicators(mask)
                 .onFailure { Log.w(it, "Could not project active indicators 0x%02X", mask) }
+                .map { mask }
+                .getOrNull()
         }
     }
 
@@ -81,6 +89,7 @@ class ActiveIndicatorsPublisher(
         synchronized(active) {
             active.clear()
             lastMask = 0
+            projected = 0
             _state.value = emptySet()
         }
     }

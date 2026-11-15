@@ -74,7 +74,9 @@ class RootMenuContentIconTest {
             ),
             currentMessage = MutableStateFlow(MessageInfo("Mama", "Probando", "WhatsApp")),
             pageFactory = { _ -> error("no entry is opened here") },
-            copy = englishClusterText
+            copy = englishClusterText,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
 
         return RootMenuItem.entries.mapIndexed { index, item ->
@@ -120,7 +122,14 @@ class RootMenuContentIconTest {
         val idle = RootMenuPageProvider(
             entries = allRootMenuEntries(),
             pageFactory = { _ -> error("no entry is opened here") },
-            copy = englishClusterText
+            copy = englishClusterText,
+            musicState = null,
+            navInstruction = null,
+            activeCall = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
 
         RootMenuItem.entries.forEachIndexed { index, item ->
@@ -156,7 +165,13 @@ class RootMenuContentIconTest {
                 )
             ),
             pageFactory = { _ -> error("no entry is opened here") },
-            copy = englishClusterText
+            copy = englishClusterText,
+            navInstruction = null,
+            activeCall = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
         repeat(4) { menu.onInput(com.opensab.sab.protocol.assignment.FunctionId.NEXT) }
 

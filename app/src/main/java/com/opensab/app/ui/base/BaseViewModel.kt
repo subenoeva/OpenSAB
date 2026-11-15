@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,7 +62,7 @@ abstract class BaseViewModel<UiState, UiIntent, UiEvent>(initialState: UiState) 
      * One failed intent must take down neither the app nor the loop. An exception escaping
      * [handleIntent] on `viewModelScope` reaches no handler and kills the process: that is how an
      * unreadable key store turned forgetting a motorcycle into a crash. The failure is logged and
-     * the collector stays alive; cancellation is rethrown untouched.
+     * the collector stays alive; the ViewModel's own cancellation is rethrown untouched.
      */
     init {
         viewModelScope.launch {
@@ -68,7 +70,10 @@ abstract class BaseViewModel<UiState, UiIntent, UiEvent>(initialState: UiState) 
                 try {
                     handleIntent(intent)
                 } catch (cancellation: CancellationException) {
-                    throw cancellation
+                    // Only the ViewModel's own end is rethrown. A timeout further down is a
+                    // CancellationException into a scope that is still alive: a failed intent.
+                    currentCoroutineContext().ensureActive()
+                    Timber.e(cancellation, "Intent %s failed", intent)
                 } catch (failure: Exception) {
                     Timber.e(failure, "Intent %s failed", intent)
                 }

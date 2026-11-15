@@ -16,6 +16,10 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.test.advanceTimeBy
+import com.opensab.logging.LogSink
+import com.opensab.logging.Log
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -236,6 +240,36 @@ class ControlPointGatewayTest {
         gateway.stop()
     }
 
+    /** The gateway outlives the session; the receipts it cached do not answer the next one's frames. */
+    @Test
+    fun shouldNotAnswerTheNextSessionWithAReceiptFromThePreviousOne() = testScope.runTest {
+        val firstLink = MockGattTransport()
+        firstLink.connect()
+        firstLink.onCharacteristicWrite = { uuid, payload ->
+            if (uuid == SabGattUuids.CHAR_DATA_COMM_CONTROL_POINT) {
+                firstLink.emitNotification(
+                    SabGattUuids.SERVICE_DATA_COMM,
+                    SabGattUuids.CHAR_DATA_COMM_CONTROL_POINT,
+                    byteArrayOf(payload[0], payload[1], 0x01)
+                )
+            }
+        }
+        val gateway = DefaultControlPointGateway()
+        gateway.start(firstLink, backgroundScope)
+        gateway.dispatch(firstLink, CommandId.REQUEST_SAB_MODE, requestId = 0x05, payload = byteArrayOf(0x0A, 0x05))
+        gateway.stop()
+
+        val silentLink = MockGattTransport()
+        silentLink.connect()
+        gateway.start(silentLink, backgroundScope)
+        val result = runCatching {
+            gateway.dispatch(silentLink, CommandId.REQUEST_SAB_MODE, requestId = 0x05, payload = byteArrayOf(0x0A, 0x05))
+        }
+
+        assertTrue("got ${result.getOrNull() ?: result.exceptionOrNull()}", result.exceptionOrNull() is ProjectionTimeoutException)
+        gateway.stop()
+    }
+
     @Test
     fun shouldFailAndExposeErrorPositionWhenReceiptStatusIsNotZero() = testScope.runTest {
         val transport = MockGattTransport()
@@ -385,5 +419,48 @@ class ControlPointGatewayTest {
         assertArrayEquals(byteArrayOf(0x0A, 0x05), capturedPayload)
         assertEquals(false, capturedWithResponse)
         gateway.stop()
+    }
+
+    @Test
+    fun aDispatchCancelledWhileQueuedLeavesTheQueue() = testScope.runTest {
+        val lines = mutableListOf<String>()
+        val sink = object : LogSink {
+            override fun log(priority: Int, t: Throwable?, message: String?, args: Array<out Any?>) {
+                if (message != null) lines += if (args.isEmpty()) message else message.format(*args)
+            }
+        }
+        Log.install(sink)
+        try {
+            val transport = MockGattTransport().apply { connect() }
+            transport.onCharacteristicWrite = { uuid, payload ->
+                // Request 1 never gets its Receipt, so it holds the wire until its watchdog.
+                if (uuid == SabGattUuids.CHAR_DATA_COMM_CONTROL_POINT && payload[1] != 1.toByte()) {
+                    transport.emitNotification(
+                        SabGattUuids.SERVICE_DATA_COMM,
+                        SabGattUuids.CHAR_DATA_COMM_CONTROL_POINT,
+                        byteArrayOf(payload[0], payload[1], 0x00)
+                    )
+                }
+            }
+            val gateway = DefaultControlPointGateway()
+            gateway.start(transport, backgroundScope)
+
+            val holder = launch {
+                runCatching { gateway.dispatch(transport, CommandId.MYSTERY_BOX, 1, byteArrayOf(0x01, 1)) }
+            }
+            val queued = launch { gateway.dispatch(transport, CommandId.MYSTERY_BOX, 2, byteArrayOf(0x01, 2)) }
+            runCurrent()
+            queued.cancel()
+            advanceTimeBy(3.seconds)
+            holder.join()
+            lines.clear()
+
+            gateway.dispatch(transport, CommandId.MYSTERY_BOX, 3, byteArrayOf(0x01, 3))
+
+            assertTrue("nothing is waiting, got: $lines", lines.none { it.contains("more waiting") })
+            gateway.stop()
+        } finally {
+            Log.uninstall(sink)
+        }
     }
 }

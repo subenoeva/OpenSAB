@@ -80,8 +80,8 @@ class MessageReplyPageProvider(
      *
      * An empty list closes the whole branch — the button, the key and the mirror zone together.
      */
-    private val quickReplies: StateFlow<List<String>> = MutableStateFlow(emptyList()),
-    private val volumeSource: VolumeSource? = null
+    private val quickReplies: StateFlow<List<String>>,
+    private val volumeSource: VolumeSource?
 ) : SpeakingPage, WorkingPage, CuingPage {
 
     override val name: String = "MessageReplyPage"

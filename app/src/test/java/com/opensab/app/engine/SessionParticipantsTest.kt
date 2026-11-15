@@ -1,6 +1,9 @@
 package com.opensab.app.engine
 
+import com.opensab.cluster.NoInterruptions
+import com.opensab.domain.audio.NoCuePlayer
 import com.opensab.app.di.OrchestratorModule
+import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.app.source.music.InMemoryFavoriteMediaRepository
 import com.opensab.cluster.BaseStateManager
 import com.opensab.cluster.StubPageProvider
@@ -70,13 +73,23 @@ class SessionParticipantsTest {
                 RootMenuPageProvider(
                     entries = allRootMenuEntries(),
                     pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-                    copy = englishClusterText
+                    copy = englishClusterText,
+                    musicState = null,
+                    navInstruction = null,
+                    activeCall = null,
+                    currentWeather = null,
+                    currentMessage = null,
+                    musicLoadingPageFactory = null,
+                    messageMenuPageFactory = null
                 )
-            }
+            },
+            interruptSource = NoInterruptions,
+            pageVoice = null,
+            cuePlayer = NoCuePlayer
         )
 
         val navManager = DefaultNavigationManager(NavigationNotificationBus())
-        val callManager = DefaultCallManager(CallNotificationBus())
+        val callManager = DefaultCallManager(CallNotificationBus(), NoAudioFocus)
         val messageSource = MockMessageSource()
         val translators = OrchestratorModule.provideIndicatorTranslators(
             musicManager = musicManager,

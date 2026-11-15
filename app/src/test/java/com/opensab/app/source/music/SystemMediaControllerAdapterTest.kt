@@ -33,7 +33,7 @@ class SystemMediaControllerAdapterTest {
     @Test
     fun publishesActiveSessionMetadataAndStatus() = testScope.runTest {
         val sessions = FakeMediaSessionSource()
-        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource())
+        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource(), favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
         adapter.start(backgroundScope)
 
         sessions.emit(
@@ -55,7 +55,7 @@ class SystemMediaControllerAdapterTest {
     @Test
     fun clearsMetadataWhenNoSessionIsActive() = testScope.runTest {
         val sessions = FakeMediaSessionSource()
-        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource())
+        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource(), favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
         adapter.start(backgroundScope)
 
         sessions.emit(
@@ -75,7 +75,7 @@ class SystemMediaControllerAdapterTest {
     @Test
     fun publishesVolumeAndMuteFromVolumeSource() = testScope.runTest {
         val volume = FakeVolumeSource()
-        val adapter = SystemMediaControllerAdapter(FakeMediaSessionSource(), volume)
+        val adapter = SystemMediaControllerAdapter(FakeMediaSessionSource(), volume, favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
         adapter.start(backgroundScope)
 
         volume.emit(VolumeLevel(percent = 40, isMuted = true))
@@ -92,7 +92,7 @@ class SystemMediaControllerAdapterTest {
     @Test
     fun delegatesTransportCommandsToSession() = testScope.runTest {
         val sessions = FakeMediaSessionSource()
-        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource())
+        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource(), favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
         adapter.start(backgroundScope)
 
         adapter.play()
@@ -109,7 +109,7 @@ class SystemMediaControllerAdapterTest {
     @Test
     fun togglePlayPausePausesWhilePlaying() = testScope.runTest {
         val sessions = FakeMediaSessionSource()
-        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource())
+        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource(), favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
         adapter.start(backgroundScope)
 
         sessions.emit(
@@ -128,7 +128,7 @@ class SystemMediaControllerAdapterTest {
     @Test
     fun togglePlayPausePlaysWhenNotPlaying() = testScope.runTest {
         val sessions = FakeMediaSessionSource()
-        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource())
+        val adapter = SystemMediaControllerAdapter(sessions, FakeVolumeSource(), favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
         adapter.start(backgroundScope)
 
         // No session at all: the handlebar still asks the last player to resume.
@@ -153,7 +153,7 @@ class SystemMediaControllerAdapterTest {
     @Test
     fun delegatesVolumeCommands() = testScope.runTest {
         val volume = FakeVolumeSource()
-        val adapter = SystemMediaControllerAdapter(FakeMediaSessionSource(), volume)
+        val adapter = SystemMediaControllerAdapter(FakeMediaSessionSource(), volume, favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
         adapter.start(backgroundScope)
 
         adapter.volumeUp()
@@ -170,7 +170,7 @@ class SystemMediaControllerAdapterTest {
     fun startAndStopPropagateToBothSources() = testScope.runTest {
         val sessions = FakeMediaSessionSource()
         val volume = FakeVolumeSource()
-        val adapter = SystemMediaControllerAdapter(sessions, volume)
+        val adapter = SystemMediaControllerAdapter(sessions, volume, favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
 
         adapter.start(backgroundScope)
         assertEquals(1, sessions.startCount)
@@ -195,7 +195,7 @@ class SystemMediaControllerAdapterTest {
     fun restartingReplacesTheCollectorsInsteadOfDuplicatingThem() = testScope.runTest {
         val sessions = FakeMediaSessionSource()
         val volume = FakeVolumeSource()
-        val adapter = SystemMediaControllerAdapter(sessions, volume)
+        val adapter = SystemMediaControllerAdapter(sessions, volume, favoriteRepository = null, appLauncher = null, appScanner = null, audioKeyDispatcher = null, applicationScope = null)
 
         adapter.start(backgroundScope)
         adapter.start(backgroundScope)
@@ -223,7 +223,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = volume,
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            appScanner = scanner
+            appScanner = scanner,
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
         adapter.start(backgroundScope)
 
@@ -249,7 +251,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            appScanner = scanner
+            appScanner = scanner,
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
         adapter.start(backgroundScope)
 
@@ -281,7 +285,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = volume,
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            appScanner = FakeMediaAppScanner(listOf(MediaAppInfo("com.spotify.music", "Spotify", "com.spotify.Service")))
+            appScanner = FakeMediaAppScanner(listOf(MediaAppInfo("com.spotify.music", "Spotify", "com.spotify.Service"))),
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
         adapter.start(backgroundScope)
 
@@ -311,7 +317,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            applicationScope = backgroundScope
+            applicationScope = backgroundScope,
+            appScanner = null,
+            audioKeyDispatcher = null
         )
 
         // Trigger play() without active BLE connection
@@ -331,7 +339,10 @@ class SystemMediaControllerAdapterTest {
             sessionSource = sessions,
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
-            appLauncher = launcher
+            appLauncher = launcher,
+            appScanner = null,
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
         adapter.start(backgroundScope)
 
@@ -355,7 +366,10 @@ class SystemMediaControllerAdapterTest {
             sessionSource = FakeMediaSessionSource(),
             volumeSource = FakeVolumeSource(),
             favoriteRepository = InMemoryFavoriteMediaRepository("com.spotify.music"),
-            appLauncher = launcher
+            appLauncher = launcher,
+            appScanner = null,
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
         adapter.start(backgroundScope)
 
@@ -376,7 +390,10 @@ class SystemMediaControllerAdapterTest {
                 override val favoritePackage: Flow<String?> = late
                 override suspend fun setFavoritePackage(packageName: String?) = Unit
             },
-            appLauncher = launcher
+            appLauncher = launcher,
+            appScanner = null,
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
         adapter.start(backgroundScope)
 
@@ -389,6 +406,34 @@ class SystemMediaControllerAdapterTest {
         assertEquals(1, launcher.launchCount)
     }
 
+    /** A play still waiting for the preferences is the rider's earlier word: a pause overrides it. */
+    @Test
+    fun pauseWhilePreferencesLoadCancelsThePendingPlay() = testScope.runTest {
+        val launcher = FakeMediaAppLauncher(connectsOnLaunch = true)
+        val late = MutableSharedFlow<String?>()
+        val adapter = SystemMediaControllerAdapter(
+            sessionSource = FakeMediaSessionSource(),
+            volumeSource = FakeVolumeSource(),
+            favoriteRepository = object : FavoriteMediaRepository {
+                override val favoritePackage: Flow<String?> = late
+                override suspend fun setFavoritePackage(packageName: String?) = Unit
+            },
+            appLauncher = launcher,
+            appScanner = null,
+            audioKeyDispatcher = null,
+            applicationScope = null
+        )
+        adapter.start(backgroundScope)
+
+        adapter.play()
+        adapter.pause()
+        late.emit("com.spotify.music")
+        advanceTimeBy(100.milliseconds)
+        runCurrent()
+
+        assertEquals("The rider's pause must stand", 0, launcher.launchCount)
+    }
+
     @Test
     fun neverBlocksVolumeOrMuteWhenLauncherIsConnecting() = testScope.runTest {
         val volume = FakeVolumeSource()
@@ -397,7 +442,11 @@ class SystemMediaControllerAdapterTest {
         val adapter = SystemMediaControllerAdapter(
             sessionSource = FakeMediaSessionSource(),
             volumeSource = volume,
-            appLauncher = launcher
+            appLauncher = launcher,
+            favoriteRepository = null,
+            appScanner = null,
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
         adapter.start(backgroundScope)
 
@@ -422,7 +471,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            applicationScope = backgroundScope
+            applicationScope = backgroundScope,
+            appScanner = null,
+            audioKeyDispatcher = null
         )
         adapter.start(backgroundScope)
 
@@ -458,7 +509,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            applicationScope = backgroundScope
+            applicationScope = backgroundScope,
+            appScanner = null,
+            audioKeyDispatcher = null
         )
         adapter.start(backgroundScope)
 
@@ -503,7 +556,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            applicationScope = backgroundScope
+            applicationScope = backgroundScope,
+            appScanner = null,
+            audioKeyDispatcher = null
         )
         adapter.start(backgroundScope)
 
@@ -537,7 +592,10 @@ class SystemMediaControllerAdapterTest {
             sessionSource = sessions,
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
-            applicationScope = backgroundScope
+            applicationScope = backgroundScope,
+            appLauncher = null,
+            appScanner = null,
+            audioKeyDispatcher = null
         )
         adapter.start(backgroundScope)
 
@@ -555,7 +613,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            applicationScope = backgroundScope
+            applicationScope = backgroundScope,
+            appScanner = null,
+            audioKeyDispatcher = null
         )
         adapter.start(backgroundScope)
 
@@ -594,7 +654,9 @@ class SystemMediaControllerAdapterTest {
             volumeSource = FakeVolumeSource(),
             favoriteRepository = favRepo,
             appLauncher = launcher,
-            applicationScope = backgroundScope
+            applicationScope = backgroundScope,
+            appScanner = null,
+            audioKeyDispatcher = null
         )
         adapter.start(backgroundScope)
 
@@ -626,7 +688,11 @@ class SystemMediaControllerAdapterTest {
         val adapter = SystemMediaControllerAdapter(
             sessionSource = sessions,
             volumeSource = FakeVolumeSource(),
-            appLauncher = launcher
+            appLauncher = launcher,
+            favoriteRepository = null,
+            appScanner = null,
+            audioKeyDispatcher = null,
+            applicationScope = null
         )
 
         adapter.reset()

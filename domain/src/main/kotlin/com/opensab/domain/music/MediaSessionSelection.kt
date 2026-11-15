@@ -2,6 +2,10 @@ package com.opensab.domain.music
 
 private const val STATE_NONE = 0
 private const val STATE_PLAYING = 3
+private const val STATE_BUFFERING = 6
+
+/** Buffering counts as playing, as it does in [playbackStatusOf]: it is the rider's play on its way. */
+private fun isSounding(state: Int) = state == STATE_PLAYING || state == STATE_BUFFERING
 
 data class SessionCandidate(
     val packageName: String,
@@ -20,11 +24,11 @@ fun selectSessionIndex(
     val preferredIndex = preferred?.let { pkg -> candidates.indexOfFirst { it.packageName == pkg } }
         ?.takeIf { it >= 0 }
 
-    if (preferredIndex != null && candidates[preferredIndex].state == STATE_PLAYING) {
+    if (preferredIndex != null && isSounding(candidates[preferredIndex].state)) {
         return preferredIndex
     }
 
-    val playingIndex = candidates.indexOfFirst { it.state == STATE_PLAYING && isPackageAllowed(it.packageName) }
+    val playingIndex = candidates.indexOfFirst { isSounding(it.state) && isPackageAllowed(it.packageName) }
     if (playingIndex >= 0) return playingIndex
 
     if (preferredIndex != null) return preferredIndex

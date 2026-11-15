@@ -24,7 +24,14 @@ class RootMenuLiveLayoutTest {
     private val page = RootMenuPageProvider(
         entries = layout,
         pageFactory = { StubPageProvider(it.title.name, ProjectionFrame.RequestSabMode(1)) },
-        copy = englishClusterText
+        copy = englishClusterText,
+        musicState = null,
+        navInstruction = null,
+        activeCall = null,
+        currentWeather = null,
+        currentMessage = null,
+        musicLoadingPageFactory = null,
+        messageMenuPageFactory = null
     )
 
     private fun header() = (page.render(1) as ProjectionFrame.MenuScreen).headerText

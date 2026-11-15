@@ -1,5 +1,6 @@
 package com.opensab.app.di
 
+import com.opensab.domain.settings.VoiceVerbosity
 import com.opensab.cluster.DefaultPageProviderFactory
 import com.opensab.cluster.PageVoice
 import com.opensab.cluster.allRootMenuEntries
@@ -119,7 +120,7 @@ class CapabilitiesWiringTest {
             capabilities = holder,
             activeIndicators = indicators,
             projectionMirror = ProjectionMirror(),
-            pageVoice = PageVoice({ "" }, MockSpeechSynthesizer(), sessionScope = backgroundScope),
+            pageVoice = PageVoice({ "" }, MockSpeechSynthesizer(), sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }),
             cuePlayer = NoCuePlayer,
             pageFactory = createTestPageFactory(callManager, telecomAdapter)
         )
@@ -158,7 +159,7 @@ class CapabilitiesWiringTest {
             capabilities = holder,
             activeIndicators = indicators,
             projectionMirror = ProjectionMirror(),
-            pageVoice = PageVoice({ "" }, MockSpeechSynthesizer(), sessionScope = backgroundScope),
+            pageVoice = PageVoice({ "" }, MockSpeechSynthesizer(), sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }),
             cuePlayer = NoCuePlayer,
             pageFactory = createTestPageFactory(callManager, telecomAdapter)
         )

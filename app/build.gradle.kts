@@ -11,8 +11,8 @@ android {
     namespace = "com.opensab.app"
     defaultConfig {
         applicationId = "com.opensab"
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
     }
 
     // No dependency metadata block in the APK: it is encrypted with a key only Google holds, so

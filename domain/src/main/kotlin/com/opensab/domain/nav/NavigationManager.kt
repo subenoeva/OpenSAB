@@ -22,11 +22,15 @@ interface NavigationManager {
     fun start(scope: CoroutineScope)
     fun stop()
 
-    fun updateInstruction(instruction: NavInstruction?)
     fun repeatManeuver()
 }
 
-/** @param notifications one instance per graph, built by `NotificationModule`. */
+/**
+ * Sole writer of [currentInstruction]: only the bus collector started in [start] sets it, and
+ * [stop] clears it.
+ *
+ * @param notifications one instance per graph, built by `NotificationModule`.
+ */
 class DefaultNavigationManager(
     private val notifications: NavigationNotificationBus
 ) : NavigationManager {
@@ -53,7 +57,7 @@ class DefaultNavigationManager(
         _currentInstruction.value = null
     }
 
-    override fun updateInstruction(instruction: NavInstruction?) {
+    private fun updateInstruction(instruction: NavInstruction?) {
         _currentInstruction.value = instruction
         Log.d("Navigation instruction updated: $instruction")
     }

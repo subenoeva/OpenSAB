@@ -12,6 +12,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -160,6 +162,23 @@ class SabSessionTest {
     }
 
     @Test
+    fun `a close action that times out inside does not skip the ones after it`() = runBlocking {
+        val order = mutableListOf<String>()
+        val session = session(id = 8L)
+        val survivor = session.scope.launch { awaitCancellation() }
+        session.onClose("earlier") { order += "earlier" }
+        session.onClose("slow") { withTimeout(10.milliseconds) { awaitCancellation() } }
+        session.close(CloseReason.DISCONNECT)
+
+        assertEquals(listOf("earlier"), order)
+        assertTrue("the scope must still be cancelled", survivor.isCancelled)
+        assertTrue(
+            "expected a warning about the timed-out action, got: $recordedLines",
+            recordedLines.any { it.contains("SabSession #8") && it.contains("slow") && it.contains("failed") }
+        )
+    }
+
+    @Test
     fun `a suspending close action completes although the scope is being cancelled`() = runBlocking {
         val session = session()
         var finished = false
@@ -169,6 +188,16 @@ class SabSessionTest {
         }
         session.close(CloseReason.DISCONNECT)
         assertTrue(finished)
+    }
+
+    /** Something that asks again and again for the same cleanup must not pile one up per ask. */
+    @Test
+    fun `an action registered once per name runs once however often it is registered`() = runBlocking {
+        var count = 0
+        val session = session()
+        repeat(3) { session.onCloseOnce("handover") { count++ } }
+        session.close(CloseReason.DISCONNECT)
+        assertEquals(1, count)
     }
 
     @Test

@@ -120,13 +120,4 @@ sealed interface ProjectionFrame {
         override val commandId: CommandId = CommandId.REQUEST_SAB_MODE
         override fun encode(): ByteArray = FrameEncoder.encodeRequestSabMode(this)
     }
-
-    /** Firmware update status (command 0x0B). */
-    data class FirmwareUpdate(
-        override val requestId: Int,
-        val status: Int
-    ) : ProjectionFrame {
-        override val commandId: CommandId = CommandId.FIRMWARE_UPDATE
-        override fun encode(): ByteArray = FrameEncoder.encodeFirmwareUpdate(this)
-    }
 }

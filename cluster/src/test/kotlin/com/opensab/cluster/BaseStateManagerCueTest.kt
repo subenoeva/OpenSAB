@@ -1,5 +1,6 @@
 package com.opensab.cluster
 
+import com.opensab.cluster.NoInterruptions
 import com.opensab.cluster.mirror.MIRROR_REQUEST_ID
 import com.opensab.cluster.mirror.MirrorPage
 import com.opensab.cluster.mirror.ProjectionMirror
@@ -115,7 +116,9 @@ class BaseStateManagerCueTest {
         activeIndicators = ActiveIndicatorsPublisher(projector),
         projectionMirror = ProjectionMirror(),
         cuePlayer = cuePlayer,
-        rootPageFactory = { root }
+        rootPageFactory = { root },
+        interruptSource = NoInterruptions,
+        pageVoice = null
     )
 
     /** What a test presses on, and the state manager underneath it for the bypass tests. */

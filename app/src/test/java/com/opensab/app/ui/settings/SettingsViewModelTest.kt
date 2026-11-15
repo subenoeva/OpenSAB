@@ -49,6 +49,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import com.opensab.sab.session.crypto.SecuritySession
+import com.opensab.sab.session.SabSessions
+import com.opensab.sab.session.SabSessionState
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
@@ -441,6 +444,45 @@ class SettingsViewModelTest {
         assertEquals(1, fakeAdapter.playCount)
     }
 
+    /**
+     * The adapter is a singleton the live session already attached to its own scope. Attaching it
+     * again to this screen's scope took it from the session, and leaving Settings cancelled the
+     * collectors the cluster's music page reads.
+     */
+    @Test
+    fun coldStartCountdownLeavesTheAdapterToALiveSession() = runTest {
+        val fakeAdapter = MockMediaControllerAdapter()
+        val sessions = MutableStateFlow<SabSessionState>(
+            SabSessionState.Connected(
+                vehicle = KnownVehicle(
+                    macAddress = "AA:BB:CC:DD:EE:FF",
+                    displayName = "Honda Forza 750",
+                    vehicleInfo = VehicleInformation(
+                        vehicleType = 0x01,
+                        displayCapability = byteArrayOf(0x01, 0x02),
+                        switchType = SwitchType.TYPE_B,
+                        categoryId = 0x01,
+                        seriesCode = "RH10",
+                        destinationId = DestinationId.EU
+                    )
+                ),
+                session = SecuritySession(macAddress = "AA:BB:CC:DD:EE:FF", aesKey = ByteArray(16))
+            )
+        )
+        val viewModel = createViewModel(
+            mediaControllerAdapter = fakeAdapter,
+            sabSessions = object : SabSessions { override val state = sessions }
+        )
+
+        viewModel.sendIntent(SettingsUiIntent.StartColdStartCountdown)
+        testScheduler.runCurrent()
+        testScheduler.advanceTimeBy(5.seconds)
+        testScheduler.runCurrent()
+
+        assertEquals("the live session owns the adapter", 0, fakeAdapter.startCount)
+        assertEquals(1, fakeAdapter.playCount)
+    }
+
     @Test
     fun openingThePickerConnectsAndListsTheRoot() = runTest {
         val browser = FakeMediaLibraryBrowser().apply {
@@ -492,6 +534,38 @@ class SettingsViewModelTest {
         val picker = viewModel.uiState.value.libraryPicker!!
         assertEquals(listOf("MY_COLLECTION_TRACKS"), picker.nodes.map { it.mediaId })
         assertEquals(listOf("ROOT_AUTO", "MY_COLLECTION"), picker.stack.map { it.mediaId })
+    }
+
+    @Test
+    fun backFromANestedContainerListsTheParentAgainAndKeepsThePickerOpen() = runTest {
+        val browser = FakeMediaLibraryBrowser().apply {
+            rootId = "ROOT_AUTO"
+            children["ROOT_AUTO"] = listOf(
+                MediaLibraryNode("MY_COLLECTION", "Colección", null, isPlayable = false, isBrowsable = true)
+            )
+            children["MY_COLLECTION"] = listOf(
+                MediaLibraryNode("MY_COLLECTION_TRACKS", "Canciones", null, isPlayable = true, isBrowsable = false)
+            )
+        }
+        val viewModel = createViewModel(
+            settingsRepository = FakeSettingsRepository(
+                AppSettings(favoriteMediaPackage = "com.aspiro.tidal")
+            ),
+            libraryBrowser = browser
+        )
+        viewModel.sendIntent(SettingsUiIntent.OpenColdStartPicker)
+        testScheduler.runCurrent()
+        viewModel.sendIntent(SettingsUiIntent.BrowseColdStartNode("MY_COLLECTION", "Colección"))
+        testScheduler.runCurrent()
+
+        viewModel.sendIntent(SettingsUiIntent.ColdStartPickerBack)
+        testScheduler.runCurrent()
+
+        val picker = viewModel.uiState.value.libraryPicker!!
+        assertEquals(listOf("MY_COLLECTION"), picker.nodes.map { it.mediaId })
+        assertEquals(listOf("ROOT_AUTO"), picker.stack.map { it.mediaId })
+        assertFalse(picker.isLoading)
+        assertEquals(0, browser.disconnectCount)
     }
 
     @Test
@@ -613,7 +687,10 @@ class SettingsViewModelTest {
         isDebuggable: Boolean = false,
         usage: MutableStateFlow<JournalUsage> = MutableStateFlow(JournalUsage(0, 0)),
         mediaControllerAdapter: MediaControllerAdapter = MockMediaControllerAdapter(),
-        libraryBrowser: MediaLibraryBrowser = FakeMediaLibraryBrowser()
+        libraryBrowser: MediaLibraryBrowser = FakeMediaLibraryBrowser(),
+        sabSessions: SabSessions = object : SabSessions {
+            override val state = MutableStateFlow<SabSessionState>(SabSessionState.Disconnected)
+        }
     ): SettingsViewModel {
         val reader = FakeJournalReader(usage)
         backgroundScope.launch(mainDispatcherRule.testDispatcher) {
@@ -631,7 +708,8 @@ class SettingsViewModelTest {
                 journalUsage = JournalUsageSource(reader),
                 isDebuggable = isDebuggable,
                 mediaControllerAdapter = mediaControllerAdapter,
-                libraryBrowser = libraryBrowser
+                libraryBrowser = libraryBrowser,
+                sabSessions = sabSessions
             )
         ).also { viewModel ->
             backgroundScope.launch(mainDispatcherRule.testDispatcher) { viewModel.uiState.collect {} }

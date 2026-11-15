@@ -53,6 +53,24 @@ class PendingGattOperationsTest {
         assertArrayEquals(byteArrayOf(0x02), fresh.await())
     }
 
+    /**
+     * The watchdog gave up on a read of A and a read of B took the slot. A's answer arriving now
+     * belongs to nobody: handed to B it would be the wrong characteristic's bytes.
+     */
+    @Test
+    fun aLateCallbackForAnotherCharacteristicLeavesTheCurrentOperationWaiting() =
+        runTest(UnconfinedTestDispatcher()) {
+            val stale = async { suspendCancellableCoroutine { pending.arm(GattOp.Read, it, CHAR_A) } }
+            stale.cancel()
+            val fresh = async { suspendCancellableCoroutine { pending.arm(GattOp.Read, it, CHAR_B) } }
+
+            assertFalse(pending.complete(GattOp.Read, Result.success(byteArrayOf(0x0A)), CHAR_A))
+            assertTrue(fresh.isActive)
+
+            assertTrue(pending.complete(GattOp.Read, Result.success(byteArrayOf(0x0B)), CHAR_B))
+            assertArrayEquals(byteArrayOf(0x0B), fresh.await())
+        }
+
     @Test
     fun armingOverAnActiveOccupantIsABrokenInvariant() = runTest(UnconfinedTestDispatcher()) {
         backgroundScope.async { suspendCancellableCoroutine { pending.arm(GattOp.Write, it) } }
@@ -148,4 +166,9 @@ class PendingGattOperationsTest {
     @Test
     fun eachOperationIsNamedForTheLog() =
         assertEquals("MTU request", GattOp.Mtu.label)
+
+    private companion object {
+        val CHAR_A: java.util.UUID = java.util.UUID.fromString("0000aaaa-0000-1000-8000-00805f9b34fb")
+        val CHAR_B: java.util.UUID = java.util.UUID.fromString("0000bbbb-0000-1000-8000-00805f9b34fb")
+    }
 }

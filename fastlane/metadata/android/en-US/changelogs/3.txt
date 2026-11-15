@@ -1,0 +1,5 @@
+- A connection that times out halfway now fails and is retried instead of hanging on "Connecting".
+- Pairing recovers once when the motorcycle refuses the stored key.
+- Two calls: hanging up the newer one brings the older one back.
+- Two message threads: a notification refresh no longer takes the screen or sends the reply to the wrong person.
+- Status bar icons are resent after a failed write.

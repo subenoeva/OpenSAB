@@ -58,7 +58,7 @@ class MessagePageProviderTest {
     fun `renders active message with sender and body in blue live screen`() {
         val messageSource = MockMessageSource()
         val volumeSource = TestVolumeSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource, canReply = MutableStateFlow(false))
 
         messageSource.setMessage(
             MessageInfo(
@@ -89,7 +89,7 @@ class MessagePageProviderTest {
     @Test
     fun `paints no reply button when the notification carries no reply`() {
         val messageSource = MockMessageSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, canReply = MutableStateFlow(false), volumeSource = null)
 
         messageSource.setMessage(MessageInfo(sender = "Elena", body = "See you in 10 minutes!"))
 
@@ -103,7 +103,7 @@ class MessagePageProviderTest {
     @Test
     fun `renders standby screen when no message is active`() {
         val messageSource = MockMessageSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, canReply = MutableStateFlow(false), volumeSource = null)
 
         val frame = provider.render(requestId = 402) as ProjectionFrame.LiveScreen
         assertEquals(402, frame.requestId)
@@ -117,7 +117,7 @@ class MessagePageProviderTest {
     @Test
     fun `back button pops back to root menu and yields the screen`() {
         val messageSource = MockMessageSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, canReply = MutableStateFlow(false), volumeSource = null)
 
         messageSource.setMessage(MessageInfo(sender = "Bob", body = "Hello"))
 
@@ -133,7 +133,7 @@ class MessagePageProviderTest {
     @Test
     fun `menu button resets back to root menu and yields the screen`() {
         val messageSource = MockMessageSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, canReply = MutableStateFlow(false), volumeSource = null)
 
         messageSource.setMessage(MessageInfo(sender = "Bob", body = "Hello"))
 
@@ -149,7 +149,7 @@ class MessagePageProviderTest {
     @Test
     fun `select button returns none action`() {
         val messageSource = MockMessageSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, canReply = MutableStateFlow(false), volumeSource = null)
 
         val action = provider.onInput(FunctionId.SELECT)
         assertEquals(NavigationAction.None, action)
@@ -159,7 +159,7 @@ class MessagePageProviderTest {
     fun `previous and volume up buttons raise volume`() {
         val messageSource = MockMessageSource()
         val volumeSource = TestVolumeSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource, canReply = MutableStateFlow(false))
 
         provider.onInput(FunctionId.PREVIOUS)
         assertEquals(1, volumeSource.raiseCalls)
@@ -172,7 +172,7 @@ class MessagePageProviderTest {
     fun `next and volume down buttons lower volume`() {
         val messageSource = MockMessageSource()
         val volumeSource = TestVolumeSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource, canReply = MutableStateFlow(false))
 
         provider.onInput(FunctionId.NEXT)
         assertEquals(1, volumeSource.lowerCalls)
@@ -185,7 +185,7 @@ class MessagePageProviderTest {
     fun `volume mute button toggles mute`() {
         val messageSource = MockMessageSource()
         val volumeSource = TestVolumeSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource, canReply = MutableStateFlow(false))
 
         provider.onInput(FunctionId.VOLUME_MUTE)
         assertEquals(1, volumeSource.muteCalls)
@@ -194,7 +194,7 @@ class MessagePageProviderTest {
     @Test
     fun `discards state on resume`() {
         val messageSource = MockMessageSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, canReply = MutableStateFlow(false), volumeSource = null)
 
         assertEquals(ResumeBehavior.DISCARD, provider.onResumeBehavior)
         assertEquals("MessagePage", provider.name)
@@ -280,7 +280,7 @@ class MessagePageProviderTest {
     fun `mirror declares the same actions in standby`() {
         val messageSource = MockMessageSource()
         val volumeSource = TestVolumeSource()
-        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource)
+        val provider = MessagePageProvider(messageSource.currentMessage, englishClusterText, messageSource, volumeSource = volumeSource, canReply = MutableStateFlow(false))
 
         assertEquals(expectedActions(canReply = false), provider.mirror().actions)
     }
@@ -290,7 +290,7 @@ class MessagePageProviderTest {
     // -----------------------------------------------------------------------------------------
 
     private fun readingPage(source: MockMessageSource) =
-        MessagePageProvider(source.currentMessage, englishClusterText, source)
+        MessagePageProvider(source.currentMessage, englishClusterText, source, canReply = MutableStateFlow(false), volumeSource = null)
 
     @Test
     fun `reads the body out loud when the message is opened`() = runTest {
@@ -544,7 +544,9 @@ class MessagePageProviderTest {
         val provider = MessagePageProvider(
             messageSource.currentMessage,
             copy = { "[${it.name}]" },
-            messageSource = messageSource
+            messageSource = messageSource,
+            canReply = MutableStateFlow(false),
+            volumeSource = null
         )
         messageSource.setMessage(MessageInfo(sender = "", body = "Hi"))
 
@@ -560,7 +562,9 @@ class MessagePageProviderTest {
         val provider = MessagePageProvider(
             messageSource.currentMessage,
             copy = { "[${it.name}]" },
-            messageSource = messageSource
+            messageSource = messageSource,
+            canReply = MutableStateFlow(false),
+            volumeSource = null
         )
 
         val frame = provider.render(1) as ProjectionFrame.LiveScreen

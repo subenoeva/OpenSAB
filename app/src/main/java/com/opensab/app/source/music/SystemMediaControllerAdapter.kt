@@ -25,11 +25,11 @@ sealed interface FavoriteSelection {
 class SystemMediaControllerAdapter(
     private val sessionSource: MediaSessionSource,
     private val volumeSource: VolumeSource,
-    private val favoriteRepository: FavoriteMediaRepository? = null,
-    private val appLauncher: MediaAppLauncher? = null,
-    private val appScanner: MediaAppScanner? = null,
-    private val audioKeyDispatcher: AudioKeyDispatcher? = null,
-    private val applicationScope: CoroutineScope? = null
+    private val favoriteRepository: FavoriteMediaRepository?,
+    private val appLauncher: MediaAppLauncher?,
+    private val appScanner: MediaAppScanner?,
+    private val audioKeyDispatcher: AudioKeyDispatcher?,
+    private val applicationScope: CoroutineScope?
 ) : MediaControllerAdapter {
 
     private val _musicState = MutableStateFlow(MusicState())
@@ -40,6 +40,9 @@ class SystemMediaControllerAdapter(
     private var favoriteJob: Job? = null
     private var autonomousFavoriteJob: Job? = null
     private var level1EscalationJob: Job? = null
+
+    // A play pressed before the favourite is known waits for it here; pause() withdraws it.
+    private var pendingPlayJob: Job? = null
 
     @Volatile
     private var favoriteSelection: FavoriteSelection =
@@ -148,7 +151,8 @@ class SystemMediaControllerAdapter(
             is FavoriteSelection.Loading -> {
                 // Wait for preferences before deciding
                 val scope = applicationScope ?: attachedScope
-                scope?.launch {
+                pendingPlayJob?.cancel()
+                pendingPlayJob = scope?.launch {
                     kotlinx.coroutines.withTimeoutOrNull(2_000.milliseconds) {
                         while (favoriteSelection is FavoriteSelection.Loading) {
                             delay(10.milliseconds)
@@ -236,6 +240,8 @@ class SystemMediaControllerAdapter(
         // A pending Level 1 watchdog would read this pause as a failed resume and cold-start the music.
         level1EscalationJob?.cancel()
         level1EscalationJob = null
+        pendingPlayJob?.cancel()
+        pendingPlayJob = null
         sessionSource.pause()
     }
 

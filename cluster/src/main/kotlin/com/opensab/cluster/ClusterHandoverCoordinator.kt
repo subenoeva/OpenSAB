@@ -38,7 +38,8 @@ class DefaultClusterHandoverCoordinator(
 
         return session.confined {
             projectionMirror.markHandoverRequested()
-            session.onClose("handover-cleanup") { projectionMirror.publishHandoverDenied() }
+            // Every press asks again; the cleanup at close is one, not one per press.
+            session.onCloseOnce("handover-cleanup") { projectionMirror.publishHandoverDenied() }
 
             val requested = runCatchingCancellable {
                 inputDispatcher.requestSabMode(transport, requestIdGenerator.nextId()).getOrThrow()

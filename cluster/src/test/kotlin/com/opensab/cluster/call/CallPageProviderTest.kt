@@ -50,7 +50,7 @@ class CallPageProviderTest {
     @Test
     fun `renders ringing call with two buttons (decline and answer) and no content icon`() {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
 
         telecom.setIncomingCall(CallInfo(callerName = "Alice", callerNumber = "+123456789", status = CallStatus.RINGING))
 
@@ -90,7 +90,7 @@ class CallPageProviderTest {
     @Test
     fun `renders standby screen when no call is active`() {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
 
         val frame = provider.render(requestId = 202) as ProjectionFrame.LiveScreen
         assertEquals(202, frame.requestId)
@@ -104,7 +104,7 @@ class CallPageProviderTest {
     @Test
     fun `back button hangs up active call and pops back to root menu`() {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
 
         telecom.setIncomingCall(CallInfo(callerName = "Bob", callerNumber = "+987654321", status = CallStatus.RINGING))
         telecom.acceptCall()
@@ -117,7 +117,7 @@ class CallPageProviderTest {
     @Test
     fun `back button rejects incoming ringing call and pops back to root menu`() {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
 
         telecom.setIncomingCall(CallInfo(callerName = "Bob", callerNumber = "+987654321", status = CallStatus.RINGING))
 
@@ -129,7 +129,7 @@ class CallPageProviderTest {
     @Test
     fun `select button answers call when ringing`() {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
 
         telecom.setIncomingCall(CallInfo(callerName = "Bob", callerNumber = "+987654321", status = CallStatus.RINGING))
 
@@ -155,7 +155,7 @@ class CallPageProviderTest {
     @Test
     fun `menu button resets back to root menu`() {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
 
         val action = provider.onInput(FunctionId.MENU)
         assertEquals(NavigationAction.Reset, action)
@@ -200,7 +200,7 @@ class CallPageProviderTest {
     @Test
     fun `retains state on resume`() {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
 
         assertEquals(ResumeBehavior.RETAIN, provider.onResumeBehavior)
         assertEquals("CallPage", provider.name)
@@ -418,7 +418,7 @@ class CallPageProviderTest {
     @Test
     fun `should take its header and its nameless caller from the resolver`() {
         val call = MutableStateFlow<CallInfo?>(CallInfo(callerName = "", callerNumber = "", status = CallStatus.ACTIVE))
-        val page = CallPageProvider(call, copy = { "[${it.name}]" })
+        val page = CallPageProvider(call, copy = { "[${it.name}]" }, telecomAdapter = null, volumeSource = null)
 
         val frame = page.render(1) as ProjectionFrame.LiveScreen
 
@@ -429,7 +429,7 @@ class CallPageProviderTest {
     @Test
     fun `should take its three status lines from the resolver`() {
         val call = MutableStateFlow<CallInfo?>(null)
-        val page = CallPageProvider(call, copy = { "[${it.name}]" })
+        val page = CallPageProvider(call, copy = { "[${it.name}]" }, telecomAdapter = null, volumeSource = null)
 
         val lines = listOf(CallStatus.RINGING, CallStatus.ACTIVE, CallStatus.DISCONNECTED).map {
             call.value = CallInfo(callerName = "Ana", callerNumber = "600", status = it)
@@ -439,10 +439,28 @@ class CallPageProviderTest {
         assertEquals(listOf("[CALL_RINGING]", "[CALL_IN_CALL]", "[CALL_ENDED]"), lines)
     }
 
+    /**
+     * A call telephony still holds but reports IDLE has no status to show. The empty second line
+     * must leave without a colour, or the encoder refuses the frame in the middle of the loop.
+     */
+    @Test
+    fun `an idle call paints no status line and still encodes`() {
+        val call = MutableStateFlow<CallInfo?>(CallInfo(callerName = "Ana", callerNumber = "600", status = CallStatus.IDLE))
+        val page = CallPageProvider(call, englishClusterText, telecomAdapter = null, volumeSource = null)
+
+        val frame = page.render(1) as ProjectionFrame.LiveScreen
+
+        assertEquals("Ana", frame.contentTextLine1)
+        assertEquals("", frame.contentTextLine2)
+        assertEquals(null, frame.contentTextColorIdLine2)
+        assertEquals(IconId.ACTIVE_CALL, frame.contentIconId)
+        assertTrue(frame.encode().isNotEmpty())
+    }
+
     @Test
     fun `should take both lines of its standby from the resolver`() {
         val call = MutableStateFlow<CallInfo?>(null)
-        val page = CallPageProvider(call, copy = { "[${it.name}]" })
+        val page = CallPageProvider(call, copy = { "[${it.name}]" }, telecomAdapter = null, volumeSource = null)
 
         val frame = page.render(1) as ProjectionFrame.LiveScreen
 
@@ -453,7 +471,7 @@ class CallPageProviderTest {
     @Test
     fun `speech emits CALL_RINGING with caller name when activeCall enters RINGING`() = runTest {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
         val spoken = mutableListOf<List<SpeechRequest>>()
         backgroundScope.launch {
             provider.speech.collect { spoken.add(it) }
@@ -473,7 +491,7 @@ class CallPageProviderTest {
     @Test
     fun `speech emits CALL_RINGING with caller number when name is empty`() = runTest {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
         val spoken = mutableListOf<List<SpeechRequest>>()
         backgroundScope.launch {
             provider.speech.collect { spoken.add(it) }
@@ -492,7 +510,7 @@ class CallPageProviderTest {
     @Test
     fun `speech emits CALL_RINGING_UNKNOWN when caller name is empty and number has no digits`() = runTest {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
         val spoken = mutableListOf<List<SpeechRequest>>()
         backgroundScope.launch {
             provider.speech.collect { spoken.add(it) }
@@ -511,7 +529,7 @@ class CallPageProviderTest {
     @Test
     fun `speech emits CALL_RINGING_UNKNOWN when caller name and number are empty`() = runTest {
         val telecom = MockTelecomAdapter()
-        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom)
+        val provider = CallPageProvider(telecom.currentCall, englishClusterText, telecom, volumeSource = null)
         val spoken = mutableListOf<List<SpeechRequest>>()
         backgroundScope.launch {
             provider.speech.collect { spoken.add(it) }
@@ -530,7 +548,7 @@ class CallPageProviderTest {
     @Test
     fun `speech deduplicates while call continues ringing`() = runTest {
         val callFlow = MutableStateFlow<CallInfo?>(null)
-        val provider = CallPageProvider(callFlow, englishClusterText)
+        val provider = CallPageProvider(callFlow, englishClusterText, telecomAdapter = null, volumeSource = null)
         val spoken = mutableListOf<List<SpeechRequest>>()
         backgroundScope.launch {
             provider.speech.collect { spoken.add(it) }
@@ -551,7 +569,7 @@ class CallPageProviderTest {
     @Test
     fun `speech resets announced call when call stops ringing and announces when new ringing call arrives`() = runTest {
         val callFlow = MutableStateFlow<CallInfo?>(null)
-        val provider = CallPageProvider(callFlow, englishClusterText)
+        val provider = CallPageProvider(callFlow, englishClusterText, telecomAdapter = null, volumeSource = null)
         val spoken = mutableListOf<List<SpeechRequest>>()
         backgroundScope.launch {
             provider.speech.collect { spoken.add(it) }

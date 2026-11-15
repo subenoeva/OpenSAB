@@ -25,6 +25,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
 
 /**
  * [SabSessionController] proven in isolation, against fakes only. The real pipeline
@@ -375,6 +379,32 @@ class SabSessionControllerTest {
         val state = controller.state.value
         assertTrue(state is SabSessionState.Error)
         assertSame(failure, (state as SabSessionState.Error).cause)
+    }
+
+    @Test
+    fun `a timeout inside the pipeline publishes Error instead of hanging in Connecting`() = runTest {
+        val pipeline = object : SessionPipeline {
+            override suspend fun open(
+                session: SabSession,
+                transport: GattTransport,
+                report: (ConnectionStep) -> Unit
+            ): SabSessionState.Connected {
+                report(ConnectionStep.ARMING_CHANNELS)
+                withTimeout(2.seconds) { awaitCancellation() }
+            }
+            override fun announceOpened(session: SabSession) = Unit
+            override fun announceClosing(session: SabSession) = Unit
+        }
+        val controller = controller(pipeline = pipeline)
+
+        controller.submit(SessionCommand.Start(MAC, SessionOrigin.RECEIVER, startId = 1))
+        runCurrent()
+        advanceTimeBy(3.seconds)
+        runCurrent()
+
+        val state = controller.state.value
+        assertTrue("expected Error, was $state", state is SabSessionState.Error)
+        assertTrue((state as SabSessionState.Error).cause is TimeoutCancellationException)
     }
 
     @Test

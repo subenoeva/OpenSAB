@@ -30,7 +30,7 @@ class RecordingNavigationManager : NavigationManager {
 
     override fun stop() = Unit
 
-    override fun updateInstruction(instruction: NavInstruction?) {
+    fun updateInstruction(instruction: NavInstruction?) {
         state.value = instruction
     }
 

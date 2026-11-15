@@ -1,0 +1,5 @@
+- Una conexión que agota un tiempo a medias falla y se reintenta, en vez de quedarse en «Conectando».
+- El emparejado se recupera una vez si la moto rechaza la clave guardada.
+- Dos llamadas: al colgar la nueva vuelve la anterior.
+- Dos conversaciones: refrescar notificaciones ya no quita la pantalla ni manda la respuesta a quien no es.
+- Los iconos de estado se reenvían tras una escritura fallida.

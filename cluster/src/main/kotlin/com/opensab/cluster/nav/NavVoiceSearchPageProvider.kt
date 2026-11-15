@@ -71,7 +71,7 @@ internal class NavVoiceSearchPageProvider(
     private val navInstructionFlow: StateFlow<NavInstruction?>,
     private val livePageFactory: () -> PageProvider,
     private val copy: ClusterTextResolver,
-    private val volumeSource: VolumeSource? = null,
+    private val volumeSource: VolumeSource?,
     private val tbtWatchdogTimeout: Duration = 15.seconds
 ) : SpeakingPage, WorkingPage, CuingPage {
 

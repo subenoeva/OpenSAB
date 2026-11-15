@@ -45,7 +45,6 @@ class AclBroadcastHandler(
             val appSettings = settings()
             val decided = AutoConnectEvaluator.evaluate(
                 action = action,
-                deviceName = deviceName,
                 deviceAddress = deviceAddress,
                 knownVehicleMacs = knownVehicleMacs(),
                 autoConnectEnabled = appSettings.autoConnect,
@@ -56,7 +55,7 @@ class AclBroadcastHandler(
             Log.d("BluetoothDeviceStateReceiver: action=$action, device=$deviceName ($deviceAddress) -> decision=$decided")
             when (decided) {
                 is AutoConnectDecision.Connect -> {
-                    Log.i("Auto-connecting to known Honda BTU: ${decided.macAddress}")
+                    Log.i("Auto-connecting to known vehicle: ${decided.macAddress}")
                     connect(decided.macAddress).join()
                 }
                 is AutoConnectDecision.Disconnect -> {

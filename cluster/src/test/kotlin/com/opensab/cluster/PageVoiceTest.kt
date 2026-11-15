@@ -1,5 +1,7 @@
 package com.opensab.cluster
 
+import com.opensab.domain.audio.NoAudioFocus
+import com.opensab.domain.settings.VoiceVerbosity
 import com.opensab.domain.audio.AudioFocus
 import com.opensab.domain.audio.AudioFocusKind
 import com.opensab.domain.audio.AudioFocusLease
@@ -45,7 +47,7 @@ class PageVoiceTest {
     fun saysEveryRequestOfTheScriptInOrder() = runTest {
         val synthesizer = MockSpeechSynthesizer()
 
-        PageVoice(naming, synthesizer, sessionScope = backgroundScope).say(listOf(header, body))
+        PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(listOf(header, body))
 
         assertEquals(
             listOf("said:WEATHER_FORECAST_MESSAGE", "said:MESSAGE_READ"),
@@ -61,7 +63,7 @@ class PageVoiceTest {
     fun leavesARequestWithoutALocaleOnTheSystemVoice() = runTest {
         val synthesizer = MockSpeechSynthesizer()
 
-        PageVoice(naming, synthesizer, sessionScope = backgroundScope).say(listOf(header))
+        PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(listOf(header))
 
         assertNull(synthesizer.utterances.single().locale)
     }
@@ -75,7 +77,7 @@ class PageVoiceTest {
         val synthesizer = MockSpeechSynthesizer()
         val chinese = Locale.forLanguageTag("zh")
 
-        PageVoice(naming, synthesizer, sessionScope = backgroundScope).say(
+        PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(
             listOf(
                 SpeechRequest(
                     SpeechToken.MESSAGE_READ,
@@ -94,7 +96,7 @@ class PageVoiceTest {
         val synthesizer = MockSpeechSynthesizer()
         val chinese = Locale.forLanguageTag("zh")
 
-        PageVoice(naming, synthesizer, sessionScope = backgroundScope).say(
+        PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(
             listOf(
                 header,
                 SpeechRequest(
@@ -117,7 +119,7 @@ class PageVoiceTest {
         val synthesizer = MockSpeechSynthesizer()
         val resolver = SpeechTextResolver { "El tiempo en Vigo" }
 
-        PageVoice(resolver, synthesizer, sessionScope = backgroundScope).say(listOf(header))
+        PageVoice(resolver, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(listOf(header))
 
         assertEquals("El tiempo en Vigo", synthesizer.utterances.single().text)
     }
@@ -130,7 +132,7 @@ class PageVoiceTest {
     fun speaksInTheSystemLanguage() = runTest {
         val synthesizer = MockSpeechSynthesizer()
 
-        PageVoice(naming, synthesizer, sessionScope = backgroundScope).say(listOf(header))
+        PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(listOf(header))
 
         assertEquals(null, synthesizer.utterances.single().locale)
     }
@@ -139,7 +141,7 @@ class PageVoiceTest {
     fun anEmptyScriptSaysNothing() = runTest {
         val synthesizer = MockSpeechSynthesizer()
 
-        PageVoice(naming, synthesizer, sessionScope = backgroundScope).say(emptyList())
+        PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(emptyList())
 
         assertTrue(synthesizer.utterances.isEmpty())
     }
@@ -151,7 +153,7 @@ class PageVoiceTest {
     @Test
     fun cancellingTheJobCutsTheVoiceMidScript() = runTest {
         val synthesizer = MockSpeechSynthesizer().apply { speaksUntilStopped = true }
-        val voice = PageVoice(naming, synthesizer, sessionScope = backgroundScope)
+        val voice = PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false })
 
         val job = launch { voice.say(listOf(header, body)) }
         runCurrent()
@@ -169,7 +171,7 @@ class PageVoiceTest {
     @Test
     fun cancellingIsNotSwallowed() = runTest {
         val synthesizer = MockSpeechSynthesizer().apply { speaksUntilStopped = true }
-        val voice = PageVoice(naming, synthesizer, sessionScope = backgroundScope)
+        val voice = PageVoice(naming, synthesizer, sessionScope = backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false })
         var reached: Throwable? = null
 
         val job = launch {
@@ -207,7 +209,9 @@ class PageVoiceTest {
             synthesizer = synthesizer,
             audioFocus = audioFocus,
             sessionScope = backgroundScope,
-            releaseDebounce = 500.milliseconds
+            releaseDebounce = 500.milliseconds,
+            verbosity = { VoiceVerbosity.STANDARD },
+            inCall = { false }
         )
 
         voice.say(listOf(header))
@@ -234,7 +238,8 @@ class PageVoiceTest {
             synthesizer = synthesizer,
             audioFocus = audioFocus,
             sessionScope = backgroundScope,
-            inCall = { inCallState }
+            inCall = { inCallState },
+            verbosity = { VoiceVerbosity.STANDARD }
         )
 
         voice.say(listOf(header))
@@ -255,7 +260,9 @@ class PageVoiceTest {
             resolver = naming,
             synthesizer = synthesizer,
             audioFocus = audioFocus,
-            sessionScope = backgroundScope
+            sessionScope = backgroundScope,
+            verbosity = { VoiceVerbosity.STANDARD },
+            inCall = { false }
         )
 
         voice.say(listOf(header))
@@ -278,7 +285,9 @@ class PageVoiceTest {
             synthesizer = synthesizer,
             audioFocus = audioFocus,
             sessionScope = backgroundScope,
-            releaseDebounce = 500.milliseconds
+            releaseDebounce = 500.milliseconds,
+            verbosity = { VoiceVerbosity.STANDARD },
+            inCall = { false }
         )
 
         voice.say(listOf(header))

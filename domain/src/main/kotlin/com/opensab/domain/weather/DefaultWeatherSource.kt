@@ -4,7 +4,9 @@ import com.opensab.domain.settings.TemperatureUnit
 import com.opensab.logging.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -170,6 +172,9 @@ class DefaultWeatherSource(
         val body = try {
             withTimeout(requestTimeout) { httpClient.get(url) }
         } catch (e: Exception) {
+            // The timeout is a CancellationException too, but into a coroutine still active: only
+            // the session stopping under the request ends it here, and that is not a failure.
+            currentCoroutineContext().ensureActive()
             Log.w(e, "Weather request failed, keeping the last reading")
             return@withLock false
         }

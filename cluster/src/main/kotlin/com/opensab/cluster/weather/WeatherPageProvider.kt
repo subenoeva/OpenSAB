@@ -45,8 +45,8 @@ class WeatherPageProvider(
      * for the same reason [copy] has none.
      */
     private val captions: WeatherCaptionResolver,
-    private val weatherSource: WeatherSource? = null,
-    private val volumeSource: VolumeSource? = null,
+    private val weatherSource: WeatherSource?,
+    private val volumeSource: VolumeSource?,
     private val nowMillis: () -> Long = System::currentTimeMillis
 ) : SpeakingPage {
 

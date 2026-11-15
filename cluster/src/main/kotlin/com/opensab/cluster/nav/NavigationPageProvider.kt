@@ -34,8 +34,8 @@ class NavigationPageProvider(
     private val navInstruction: StateFlow<NavInstruction?>,
     /** No default: one would be a page painting English because the graph forgot. */
     private val copy: ClusterTextResolver,
-    private val navigationManager: NavigationManager? = null,
-    private val volumeSource: VolumeSource? = null
+    private val navigationManager: NavigationManager?,
+    private val volumeSource: VolumeSource?
 ) : SpeakingPage {
 
     override val name: String = "NavigationPage"

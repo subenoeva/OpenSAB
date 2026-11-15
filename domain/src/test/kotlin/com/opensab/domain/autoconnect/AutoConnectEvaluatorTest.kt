@@ -9,10 +9,9 @@ class AutoConnectEvaluatorTest {
     private val knownMacs = setOf(knownMac)
 
     @Test
-    fun shouldReturnConnectWhenAclConnectedForKnownHondaBtu() {
+    fun shouldReturnConnectWhenAclConnectedForAKnownVehicle() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_CONNECTED",
-            deviceName = "HONDA BTU 73FD",
             deviceAddress = knownMac,
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true
@@ -20,11 +19,14 @@ class AutoConnectEvaluatorTest {
         assertEquals(AutoConnectDecision.Connect(knownMac), decision)
     }
 
+    /**
+     * No name is needed: without BLUETOOTH_CONNECT, or before it is cached, the broadcast carries
+     * none, and a paired motorcycle is known by its address.
+     */
     @Test
-    fun shouldReturnConnectWhenNameHasDifferentCase() {
+    fun shouldReturnConnectWhenTheAddressHasDifferentCase() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_CONNECTED",
-            deviceName = "Honda Btu 73fd",
             deviceAddress = "02:00:00:00:00:ab",
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true
@@ -33,10 +35,9 @@ class AutoConnectEvaluatorTest {
     }
 
     @Test
-    fun shouldReturnIgnoreWhenDeviceIsNotHondaBtu() {
+    fun shouldReturnIgnoreWhenTheDeviceIsNotAKnownVehicle() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_CONNECTED",
-            deviceName = "Sony WH-1000XM4",
             deviceAddress = "11:22:33:44:55:66",
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true
@@ -45,10 +46,9 @@ class AutoConnectEvaluatorTest {
     }
 
     @Test
-    fun shouldReturnIgnoreWhenHondaBtuIsNotInKnownVehicles() {
+    fun shouldReturnIgnoreWhenAnotherBtuIsNotInKnownVehicles() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_CONNECTED",
-            deviceName = "HONDA BTU 9999",
             deviceAddress = "AA:BB:CC:DD:EE:FF",
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true
@@ -60,7 +60,6 @@ class AutoConnectEvaluatorTest {
     fun shouldReturnIgnoreWhenAutoConnectIsDisabled() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_CONNECTED",
-            deviceName = "HONDA BTU 73FD",
             deviceAddress = knownMac,
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = false
@@ -72,7 +71,6 @@ class AutoConnectEvaluatorTest {
     fun shouldReturnDisconnectWhenAclDisconnectedMatchesActiveSession() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_DISCONNECTED",
-            deviceName = "HONDA BTU 73FD",
             deviceAddress = knownMac,
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true,
@@ -85,7 +83,6 @@ class AutoConnectEvaluatorTest {
     fun shouldReturnIgnoreWhenAclDisconnectedDoesNotMatchActiveSession() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_DISCONNECTED",
-            deviceName = "Some Other Device",
             deviceAddress = "00:11:22:33:44:55",
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true,
@@ -98,7 +95,6 @@ class AutoConnectEvaluatorTest {
     fun shouldReturnIgnoreWhenDeviceAddressIsNull() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_CONNECTED",
-            deviceName = "HONDA BTU 73FD",
             deviceAddress = null,
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true
@@ -110,7 +106,6 @@ class AutoConnectEvaluatorTest {
     fun shouldReturnIgnoreWhenAutoDisconnectIsDisabled() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_DISCONNECTED",
-            deviceName = "HONDA BTU 73FD",
             deviceAddress = knownMac,
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true,
@@ -124,7 +119,6 @@ class AutoConnectEvaluatorTest {
     fun shouldStillDisconnectWhenOnlyAutoConnectIsDisabled() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "android.bluetooth.device.action.ACL_DISCONNECTED",
-            deviceName = "HONDA BTU 73FD",
             deviceAddress = knownMac,
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = false,
@@ -142,7 +136,6 @@ class AutoConnectEvaluatorTest {
     fun shouldReturnIgnoreWhenActionIsUnknown() {
         val decision = AutoConnectEvaluator.evaluate(
             action = "some.random.action",
-            deviceName = "HONDA BTU 73FD",
             deviceAddress = knownMac,
             knownVehicleMacs = knownMacs,
             autoConnectEnabled = true

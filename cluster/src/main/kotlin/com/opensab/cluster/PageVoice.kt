@@ -3,7 +3,6 @@ package com.opensab.cluster
 import com.opensab.domain.audio.AudioFocus
 import com.opensab.domain.audio.AudioFocusKind
 import com.opensab.domain.audio.AudioFocusLease
-import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.domain.settings.VoiceVerbosity
 import com.opensab.domain.speech.SpeechRequest
 import com.opensab.domain.speech.SpeechSynthesizer
@@ -46,9 +45,9 @@ import kotlin.time.Duration.Companion.milliseconds
 class PageVoice(
     private val resolver: SpeechTextResolver,
     private val synthesizer: SpeechSynthesizer,
-    private val audioFocus: AudioFocus = NoAudioFocus,
-    private val verbosity: () -> VoiceVerbosity = { VoiceVerbosity.STANDARD },
-    private val inCall: () -> Boolean = { false },
+    private val audioFocus: AudioFocus,
+    private val verbosity: () -> VoiceVerbosity,
+    private val inCall: () -> Boolean,
     private val releaseDebounce: Duration = RELEASE_DEBOUNCE,
     private val sessionScope: CoroutineScope
 ) {

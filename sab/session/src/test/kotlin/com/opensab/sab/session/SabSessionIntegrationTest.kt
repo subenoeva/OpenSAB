@@ -91,7 +91,10 @@ class SabSessionIntegrationTest {
             sabModeFallbacks = { SabModeFallbacks() },
             ctsServer = ctsServer,
             clockSyncEnabled = { true },
-            liveLinkHolder = liveLinkHolder
+            liveLinkHolder = liveLinkHolder,
+            activeIndicatorsPublisher = null,
+            announcer = null,
+            storedProfileResolver = null
         )
 
         val session = SabSession(

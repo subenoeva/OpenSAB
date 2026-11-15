@@ -74,4 +74,11 @@ class AsciiFoldingTextSanitizerTest {
         assertEquals("", sanitizer.sanitize("", segmentDisplay = true))
         assertEquals("", sanitizer.sanitize("", segmentDisplay = false))
     }
+
+    /** One character the cluster cannot draw is one `?`, also when Java needs two chars to hold it. */
+    @Test
+    fun `an emoji outside the basic plane becomes one fallback character, not two`() {
+        assertEquals("Ok ?", sanitizer.toAscii("Ok 👍"))
+        assertEquals("??", sanitizer.toAscii("🎵🎵"))
+    }
 }

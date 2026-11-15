@@ -36,6 +36,28 @@ class MediaSessionSelectionTest {
         )
     }
 
+    /**
+     * Buffering is the rider's play on its way: the dash already shows it as playing, so the
+     * selection has to agree and keep the favourite over another app that happens to sound.
+     */
+    @Test
+    fun aBufferingFavouriteCountsAsPlaying() {
+        val candidates = listOf(
+            SessionCandidate(antennaPod, STATE_PLAYING),
+            SessionCandidate(spotify, STATE_BUFFERING)
+        )
+        assertEquals(1, selectSessionIndex(candidates, spotify))
+    }
+
+    @Test
+    fun aBufferingSessionBeatsAPausedOne() {
+        val candidates = listOf(
+            SessionCandidate(antennaPod, STATE_PAUSED),
+            SessionCandidate("com.aspiro.tidal", STATE_BUFFERING)
+        )
+        assertEquals(1, selectSessionIndex(candidates, spotify))
+    }
+
     @Test
     fun fallsBackToThePausedFavouriteWhenNothingIsPlaying() {
         val candidates = listOf(
@@ -107,5 +129,6 @@ class MediaSessionSelectionTest {
         const val STATE_STOPPED = 1
         const val STATE_PAUSED = 2
         const val STATE_PLAYING = 3
+        const val STATE_BUFFERING = 6
     }
 }

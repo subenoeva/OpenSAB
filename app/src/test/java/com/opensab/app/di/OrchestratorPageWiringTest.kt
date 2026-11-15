@@ -1,6 +1,8 @@
 package com.opensab.app.di
 
+import com.opensab.domain.settings.VoiceVerbosity
 import com.opensab.cluster.DefaultPageProviderFactory
+import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.cluster.PageProvider
 import com.opensab.cluster.PageProviderFactory
 import com.opensab.cluster.PageVoice
@@ -103,7 +105,7 @@ class OrchestratorPageWiringTest {
         val indicators = ActiveIndicatorsPublisher(projector)
         val callBus = CallNotificationBus()
         val callDriver = CallNotificationDriver(callBus)
-        val callManager = DefaultCallManager(callBus)
+        val callManager = DefaultCallManager(callBus, NoAudioFocus)
         val weather = MockWeatherSource()
         val message = MockMessageSource()
         val smsSender = MockSmsSender()
@@ -141,7 +143,7 @@ class OrchestratorPageWiringTest {
             capabilities = VehicleCapabilitiesHolder(),
             activeIndicators = indicators,
             projectionMirror = ProjectionMirror(),
-            pageVoice = PageVoice({ "" }, MockSpeechSynthesizer(), sessionScope = scope),
+            pageVoice = PageVoice({ "" }, MockSpeechSynthesizer(), sessionScope = scope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }),
             cuePlayer = NoCuePlayer,
             pageFactory = pageFactory
         )

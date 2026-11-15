@@ -30,7 +30,7 @@ class MessageInterruptSourceTest {
         MessagePromptPageProvider(source.currentMessage, englishClusterText, source, null) { readPage }
 
     private fun readPageFor(source: MockMessageSource) =
-        MessagePageProvider(source.currentMessage, englishClusterText, source)
+        MessagePageProvider(source.currentMessage, englishClusterText, source, canReply = MutableStateFlow(false), volumeSource = null)
 
     @Test
     fun claimsNothingWhileNoMessageIsUnread() = testScope.runTest {

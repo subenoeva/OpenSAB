@@ -32,8 +32,8 @@ internal class MusicErrorPageProvider(
     private val copy: ClusterTextResolver,
     /** "Handlebar Volume Control". Off, the vertical keys stop changing the phone volume here; mute does not. */
     private val volumeControl: StateFlow<Boolean>,
-    private val volumeSource: VolumeSource? = null,
-    private val musicManager: MusicManager? = null,
+    private val volumeSource: VolumeSource?,
+    private val musicManager: MusicManager?,
     private val autoPopDuration: Duration = 5.seconds
 ) : WorkingPage, SpeakingPage {
 

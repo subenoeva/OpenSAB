@@ -309,6 +309,59 @@ class FrameEncodingGoldenTest {
         )
     }
 
+    @Test
+    fun encodeLiveScreenThrowsWhenRightActionInconsistent() {
+        val frame = bareLiveScreen().copy(
+            rightActionIconId = IconId.LIVE_ARROW_RIGHT,
+            rightActionIconTintColorId = ColorId.ORANGE
+        )
+
+        val exception = assertThrows(IllegalArgumentException::class.java) { frame.encode() }
+        assertTrue(exception.message?.contains("Right action requires all 4 attributes") == true)
+    }
+
+    @Test
+    fun encodeLiveScreenThrowsWhenAnAbsentLeftActionCarriesAttributes() {
+        val frame = bareLiveScreen().copy(leftActionBgColorId = ColorId.ORANGE)
+
+        val exception = assertThrows(IllegalArgumentException::class.java) { frame.encode() }
+        assertTrue(exception.message?.contains("Left action attributes must be null") == true)
+    }
+
+    @Test
+    fun encodeLiveScreenThrowsWhenAnAbsentRightActionCarriesAttributes() {
+        val frame = bareLiveScreen().copy(rightActionContentIconId = IconId.LIVE_ARROW_RIGHT)
+
+        val exception = assertThrows(IllegalArgumentException::class.java) { frame.encode() }
+        assertTrue(exception.message?.contains("Right action attributes must be null") == true)
+    }
+
+    /** A live screen with no action on either side, which encodes; each test breaks one rule. */
+    private fun bareLiveScreen() = ProjectionFrame.LiveScreen(
+        requestId = 0x01,
+        headerBgColorId = ColorId.PURE_BLACK,
+        headerText = "",
+        headerTextColorId = null,
+        bodyBgColorId = ColorId.PURE_BLACK,
+        leftActionIconId = IconId.IC_NONE,
+        leftActionIconTintColorId = null,
+        leftActionContentIconId = null,
+        leftActionContentIconTintColorId = null,
+        leftActionBgColorId = null,
+        rightActionIconId = IconId.IC_NONE,
+        rightActionIconTintColorId = null,
+        rightActionContentIconId = null,
+        rightActionContentIconTintColorId = null,
+        rightActionBgColorId = null,
+        contentBgColorId = ColorId.PURE_BLACK,
+        contentIconId = IconId.IC_NONE,
+        contentIconTintColorId = null,
+        contentTextLine1 = "",
+        contentTextColorIdLine1 = null,
+        contentTextLine2 = "",
+        contentTextColorIdLine2 = null
+    )
+
     /** A consistent MENU frame; each test overrides only the slot it puts under test. */
     private fun menuScreen(
         upActionIconId: IconId = IconId.IC_NONE,

@@ -65,6 +65,13 @@ class DefaultScreenProjector(
      */
     private var shownBase: ByteArray? = null
     private var shownBaseReceipt: Receipt? = null
+
+    /**
+     * Bumped every time [shownBase] is forgotten. A base frame records itself as shown only if
+     * nothing forgot it while it waited for its Receipt: a popup or a mode change in that window
+     * means the cluster is no longer showing it.
+     */
+    private var shownBaseGeneration = 0L
     private var activePopUp: QueuedPopUp? = null
     private var modeObserverJob: Job? = null
 
@@ -119,6 +126,7 @@ class DefaultScreenProjector(
         Log.v("Transmitting base screen frame [${payload.size} bytes]: ${payload.joinToString(" ") { "%02X".format(it) }}")
 
         forgetShownBase()
+        val generation = shownBaseGeneration
         val receipt = controlPointGateway.dispatch(
             transport = currentTransport,
             commandId = frame.commandId,
@@ -126,8 +134,10 @@ class DefaultScreenProjector(
             payload = payload
         )
 
-        shownBase = content
-        shownBaseReceipt = receipt
+        if (generation == shownBaseGeneration) {
+            shownBase = content
+            shownBaseReceipt = receipt
+        }
         currentBaseFrame = frame
         _renderState.value = RenderState.Projecting(baseFrame = frame, activePopUp = activePopUp)
         receipt
@@ -233,6 +243,7 @@ class DefaultScreenProjector(
     private fun forgetShownBase() {
         shownBase = null
         shownBaseReceipt = null
+        shownBaseGeneration++
     }
 
     /** Byte 1 of every frame is its requestId, the one byte a repaint always changes. */

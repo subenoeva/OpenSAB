@@ -30,8 +30,8 @@ import kotlinx.coroutines.flow.transform
 class CallPageProvider(
     private val activeCall: StateFlow<CallInfo?>,
     private val copy: ClusterTextResolver,
-    private val telecomAdapter: TelecomAdapter? = null,
-    private val volumeSource: VolumeSource? = null
+    private val telecomAdapter: TelecomAdapter?,
+    private val volumeSource: VolumeSource?
 ) : SpeakingPage {
 
     override val name: String = "CallPage"

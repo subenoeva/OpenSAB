@@ -274,6 +274,65 @@ class PopupManagerTest {
     }
 
     @Test
+    fun `a second degraded popup does not keep the first one's bit lit`() = testScope.runTest {
+        val projector = RecordingScreenProjector()
+        val publisher = ActiveIndicatorsPublisher(projector)
+        val holder = VehicleCapabilitiesHolder()
+        holder.adopt(segmentClusterVehicle())
+        val manager = popupManager(projector, capabilities = holder, activeIndicators = publisher)
+        manager.start(backgroundScope)
+
+        manager.post(
+            QueuedPopUp(
+                id = "nav",
+                message = "Gire a la derecha",
+                icon = IconId.NAVIGATION,
+                priority = PopUpPriority.NAVIGATION_ALERT,
+                duration = 5.seconds
+            )
+        )
+        advanceTimeBy(1.seconds)
+        manager.post(
+            QueuedPopUp(
+                id = "msg",
+                message = "Alice",
+                icon = IconId.INCOMING_MESSAGE,
+                priority = PopUpPriority.SYSTEM_NOTIFICATION,
+                duration = 5.seconds
+            )
+        )
+
+        advanceTimeBy(4_001.milliseconds)
+        assertEquals(com.opensab.sab.protocol.projection.ActiveIndicator.MESSAGE.bit, publisher.mask)
+
+        advanceTimeBy(1.seconds)
+        assertEquals(0, publisher.mask)
+    }
+
+    @Test
+    fun `the same degraded bit stays lit for the latest popup's duration`() = testScope.runTest {
+        val projector = RecordingScreenProjector()
+        val publisher = ActiveIndicatorsPublisher(projector)
+        val holder = VehicleCapabilitiesHolder()
+        holder.adopt(segmentClusterVehicle())
+        val manager = popupManager(projector, capabilities = holder, activeIndicators = publisher)
+        manager.start(backgroundScope)
+        val message = { id: String ->
+            QueuedPopUp(id = id, message = id, icon = IconId.INCOMING_MESSAGE, priority = PopUpPriority.SYSTEM_NOTIFICATION, duration = 5.seconds)
+        }
+
+        manager.post(message("first"))
+        advanceTimeBy(3.seconds)
+        manager.post(message("second"))
+
+        advanceTimeBy(2_001.milliseconds)
+        assertEquals(com.opensab.sab.protocol.projection.ActiveIndicator.MESSAGE.bit, publisher.mask)
+
+        advanceTimeBy(3.seconds)
+        assertEquals(0, publisher.mask)
+    }
+
+    @Test
     fun `does not touch the indicators of other adapters when it degrades`() = testScope.runTest {
         val projector = RecordingScreenProjector()
         val publisher = ActiveIndicatorsPublisher(projector)

@@ -141,6 +141,22 @@ class DefaultMessageSourceTest {
         assertFalse("an identical repost is not a new message", harness.source.claimingScreen.value)
     }
 
+    /** An app refreshing its UI reposts every live thread, the older ones included. */
+    @Test
+    fun aRepostOfAnOlderThreadDoesNotTakeTheScreenBack() = testScope.runTest {
+        val harness = Harness(backgroundScope)
+        post(harness.bus, notification(key = "thread-1"))
+        post(harness.bus, notification(key = "thread-2", title = "Marta", text = "Lunch?"))
+        runCurrent()
+        harness.source.yieldScreen()
+
+        post(harness.bus, notification(key = "thread-1"))
+        runCurrent()
+
+        assertFalse("a repost of an older thread is not a new message", harness.source.claimingScreen.value)
+        assertEquals("Marta", harness.source.currentMessage.value?.sender)
+    }
+
     @Test
     fun aNewBodyOnTheSameThreadClaimsTheScreenAgain() = testScope.runTest {
         val harness = Harness(backgroundScope)
@@ -285,6 +301,23 @@ class DefaultMessageSourceTest {
         assertFalse("an identical repost is still not a new message", harness.source.claimingScreen.value)
         assertEquals(emptyList<String>(), first.sent)
         assertEquals(listOf("On my way"), second.sent)
+    }
+
+    /** The page shows the newer thread, so its button must answer that thread. */
+    @Test
+    fun `keeps replying to the shown thread through a repost of another one`() = testScope.runTest {
+        val harness = Harness(backgroundScope)
+        val older = RecordingReply("older")
+        val shown = RecordingReply("shown")
+        post(harness.bus, notification(key = "thread-1"), older)
+        post(harness.bus, notification(key = "thread-2", title = "Marta", text = "Lunch?"), shown)
+        runCurrent()
+
+        post(harness.bus, notification(key = "thread-1"), RecordingReply("older-repost"))
+        runCurrent()
+        harness.source.reply("On my way")
+
+        assertEquals(listOf("On my way"), shown.sent)
     }
 
     @Test

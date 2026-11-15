@@ -81,7 +81,8 @@ class SpeakingPagesVerbosityTest {
             currentWeather = weatherSource.currentWeather,
             copy = englishClusterText,
             captions = englishWeatherCaptions,
-            weatherSource = weatherSource
+            weatherSource = weatherSource,
+            volumeSource = null
         )
         val weatherHarness = PageHarness(weatherPage) {
             weatherSource.updateWeather(
@@ -96,7 +97,9 @@ class SpeakingPagesVerbosityTest {
         val promptPage = MessagePromptPageProvider(
             currentMessage = promptFlow,
             copy = englishClusterText,
-            readPageFactory = { StubPageProvider("StubRead", LiveScreenPresets.idle(1)) }
+            readPageFactory = { StubPageProvider("StubRead", LiveScreenPresets.idle(1)) },
+            messageSource = null,
+            volumeSource = null
         )
         val promptHarness = PageHarness(promptPage) {
             promptFlow.value = MessageInfo(
@@ -109,7 +112,10 @@ class SpeakingPagesVerbosityTest {
         val messageFlow = MutableStateFlow<MessageInfo?>(null)
         val messagePage = MessagePageProvider(
             currentMessage = messageFlow,
-            copy = englishClusterText
+            copy = englishClusterText,
+            messageSource = null,
+            canReply = MutableStateFlow(false),
+            volumeSource = null
         )
         val messageHarness = PageHarness(messagePage) {
             messageFlow.value = MessageInfo(
@@ -122,7 +128,9 @@ class SpeakingPagesVerbosityTest {
         val callFlow = MutableStateFlow<CallInfo?>(null)
         val callPage = CallPageProvider(
             activeCall = callFlow,
-            copy = englishClusterText
+            copy = englishClusterText,
+            telecomAdapter = null,
+            volumeSource = null
         )
         val callHarness = PageHarness(callPage) {
             callFlow.value = CallInfo(
@@ -140,7 +148,8 @@ class SpeakingPagesVerbosityTest {
             dialer = MockCallDialer(),
             livePageFactory = { StubPageProvider("StubCall", LiveScreenPresets.idle(1)) },
             copy = englishClusterText,
-            activeCall = MutableStateFlow<CallInfo?>(null)
+            activeCall = MutableStateFlow<CallInfo?>(null),
+            volumeSource = null
         )
         val dialHarness = PageHarness(dialPage) {
             // Already emits on mount/collection because DialSeed.Favorites starts in Confirming
@@ -153,7 +162,8 @@ class SpeakingPagesVerbosityTest {
             messageSource = MockMessageSource(),
             sentLinger = MutableStateFlow(2.seconds),
             copy = englishClusterText,
-            quickReplies = MutableStateFlow(listOf("Yes", "No"))
+            quickReplies = MutableStateFlow(listOf("Yes", "No")),
+            volumeSource = null
         )
         val replyHarness = PageHarness(replyPage) {
             scope.launch { replyPage.work() }
@@ -181,7 +191,8 @@ class SpeakingPagesVerbosityTest {
                 synthesizer = synthesizer,
                 audioFocus = focus,
                 verbosity = { VoiceVerbosity.NONE },
-                sessionScope = backgroundScope
+                sessionScope = backgroundScope,
+                inCall = { false }
             )
 
             val collector = backgroundScope.launch {
@@ -214,7 +225,8 @@ class SpeakingPagesVerbosityTest {
                 synthesizer = synthesizer,
                 audioFocus = focus,
                 verbosity = { VoiceVerbosity.STANDARD },
-                sessionScope = backgroundScope
+                sessionScope = backgroundScope,
+                inCall = { false }
             )
 
             val collector = backgroundScope.launch {
@@ -258,7 +270,8 @@ class SpeakingPagesVerbosityTest {
                 synthesizer = synthesizer,
                 audioFocus = focus,
                 verbosity = { VoiceVerbosity.ADVANCED },
-                sessionScope = backgroundScope
+                sessionScope = backgroundScope,
+                inCall = { false }
             )
 
             val collector = backgroundScope.launch {
@@ -302,7 +315,8 @@ class SpeakingPagesVerbosityTest {
                 synthesizer = synthesizer,
                 audioFocus = focus,
                 verbosity = { verbosity },
-                sessionScope = backgroundScope
+                sessionScope = backgroundScope,
+                inCall = { false }
             )
 
             val targets = listOf(
@@ -316,7 +330,8 @@ class SpeakingPagesVerbosityTest {
                 dialer = MockCallDialer(),
                 livePageFactory = { StubPageProvider("StubCall", LiveScreenPresets.idle(1)) },
                 copy = englishClusterText,
-                activeCall = MutableStateFlow<CallInfo?>(null)
+                activeCall = MutableStateFlow<CallInfo?>(null),
+                volumeSource = null
             )
 
             val speechJob = backgroundScope.launch {

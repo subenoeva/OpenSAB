@@ -39,13 +39,13 @@ class DefaultMessageSource(
     private var busJob: Job? = null
 
     /**
-     * Messaging apps repost the very same notification whenever their own UI refreshes, and that
-     * cannot take the screen away from the rider a second time. Same key, same body and same
-     * timestamp is a repost; the same key with a new body is the next message in the thread.
+     * Messaging apps repost the very same notification whenever their own UI refreshes, every live
+     * thread at once, and that cannot take the screen away from the rider a second time. Same key,
+     * same body and same timestamp is a repost; the same key with a new body is the next message in
+     * the thread. So the last version of **each** live thread is kept, not only the shown one's.
      */
     private var lastKey: String? = null
-    private var lastBody: String? = null
-    private var lastTimestamp: Long? = null
+    private val lastSeen = HashMap<String, Pair<String, Long>>()
 
     /**
      * The way back into the live notification, owned here and nowhere else.
@@ -107,28 +107,30 @@ class DefaultMessageSource(
     private fun onPosted(notification: MessageNotification, reply: MessageReplyCommands?) {
         val message = MessageNotificationParser.parse(notification) ?: return
 
+        val key = notification.key
+        val version = message.body to message.timestamp
+
         // Before the dedup, deliberately. A repost the rider never sees still carries the live
         // handle, and the one it replaces may already be dead — the button on the page he has been
-        // looking at all along has to keep working.
-        setReply(reply)
+        // looking at all along has to keep working. Only the shown thread's, though: the handle of
+        // another thread would send the reply to the wrong person.
+        if (key == lastKey) setReply(reply)
 
-        if (notification.key == lastKey &&
-            message.body == lastBody &&
-            message.timestamp == lastTimestamp
-        ) {
-            Log.d("Ignoring a repost of %s", notification.key)
+        if (lastSeen[key] == version) {
+            Log.d("Ignoring a repost of %s", key)
             return
         }
 
         Log.d("Message from %s on %s", message.sender, message.appName)
-        lastKey = notification.key
-        lastBody = message.body
-        lastTimestamp = message.timestamp
+        lastSeen[key] = version
+        lastKey = key
+        setReply(reply)
         _currentMessage.value = message
         _claimingScreen.value = true
     }
 
     private fun onRemoved(key: String) {
+        lastSeen.remove(key)
         if (key != lastKey) return
         Log.d("Message thread %s retired on the phone", key)
         forget()
@@ -136,8 +138,7 @@ class DefaultMessageSource(
 
     private fun forget() {
         lastKey = null
-        lastBody = null
-        lastTimestamp = null
+        lastSeen.clear()
         setReply(null)
         _currentMessage.value = null
         _claimingScreen.value = false

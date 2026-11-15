@@ -74,6 +74,7 @@ class DefaultAssignmentManager(
         val subscriptionJob = try {
             subscribeToResults(transport, scope, results)
         } catch (e: Throwable) {
+            if (e.isCancellationOfTheCaller()) throw e
             Log.w(e, "AssignmentControl subscription did not arm; running the assignment blind (results will all read as timed out)")
             null
         }

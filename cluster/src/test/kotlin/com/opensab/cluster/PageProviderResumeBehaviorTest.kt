@@ -44,26 +44,33 @@ class PageProviderResumeBehaviorTest {
         val rootMenu = RootMenuPageProvider(
             entries = allRootMenuEntries(),
             pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = englishClusterText
+            copy = englishClusterText,
+            musicState = null,
+            navInstruction = null,
+            activeCall = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
         assertEquals(ResumeBehavior.RETAIN, rootMenu.onResumeBehavior)
 
-        val music = MusicPageProvider(MutableStateFlow(MusicState(TrackMetadata("", ""), PlaybackStatus.NONE)), englishClusterText, volumeControlOn)
+        val music = MusicPageProvider(MutableStateFlow(MusicState(TrackMetadata("", ""), PlaybackStatus.NONE)), englishClusterText, volumeControlOn, musicManager = null)
         assertEquals(ResumeBehavior.RETAIN, music.onResumeBehavior)
 
-        val volume = VolumePageProvider(MutableStateFlow(VolumeLevel(5, false)), englishClusterText, volumeControlOn)
+        val volume = VolumePageProvider(MutableStateFlow(VolumeLevel(5, false)), englishClusterText, volumeControlOn, volumeSource = null)
         assertEquals(ResumeBehavior.RETAIN, volume.onResumeBehavior)
 
-        val navigation = NavigationPageProvider(MutableStateFlow(null), englishClusterText)
+        val navigation = NavigationPageProvider(MutableStateFlow(null), englishClusterText, navigationManager = null, volumeSource = null)
         assertEquals(ResumeBehavior.RETAIN, navigation.onResumeBehavior)
 
-        val call = CallPageProvider(MutableStateFlow(null), englishClusterText)
+        val call = CallPageProvider(MutableStateFlow(null), englishClusterText, telecomAdapter = null, volumeSource = null)
         assertEquals(ResumeBehavior.RETAIN, call.onResumeBehavior)
 
-        val weather = WeatherPageProvider(MutableStateFlow(null), englishClusterText, englishWeatherCaptions)
+        val weather = WeatherPageProvider(MutableStateFlow(null), englishClusterText, englishWeatherCaptions, weatherSource = null, volumeSource = null)
         assertEquals(ResumeBehavior.RETAIN, weather.onResumeBehavior)
 
-        val message = MessagePageProvider(MutableStateFlow(null), englishClusterText)
+        val message = MessagePageProvider(MutableStateFlow(null), englishClusterText, messageSource = null, canReply = MutableStateFlow(false), volumeSource = null)
         assertEquals(ResumeBehavior.DISCARD, message.onResumeBehavior)
 
         /**
@@ -74,7 +81,9 @@ class PageProviderResumeBehaviorTest {
             recognizer = MockSpeechRecognizer(),
             messageSource = MockMessageSource(),
             sentLinger = MutableStateFlow(2.seconds),
-            copy = englishClusterText
+            copy = englishClusterText,
+            quickReplies = MutableStateFlow(emptyList()),
+            volumeSource = null
         )
         assertEquals(ResumeBehavior.DISCARD, reply.onResumeBehavior)
 
@@ -85,7 +94,8 @@ class PageProviderResumeBehaviorTest {
             dialer = MockCallDialer(),
             livePageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
             copy = englishClusterText,
-            activeCall = MutableStateFlow<CallInfo?>(null)
+            activeCall = MutableStateFlow<CallInfo?>(null),
+            volumeSource = null
         )
         assertEquals(ResumeBehavior.DISCARD, dial.onResumeBehavior)
 
@@ -101,7 +111,8 @@ class PageProviderResumeBehaviorTest {
             unlockSource = FakeDeviceUnlockSource(),
             navInstructionFlow = MutableStateFlow(null),
             livePageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = englishClusterText
+            copy = englishClusterText,
+            volumeSource = null
         )
         assertEquals(ResumeBehavior.DISCARD, navVoice.onResumeBehavior)
     }

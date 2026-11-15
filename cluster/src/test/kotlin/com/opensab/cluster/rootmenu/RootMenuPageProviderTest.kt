@@ -890,7 +890,13 @@ class RootMenuPageProviderTest {
             onBuild()
             StubPageProvider("stub", ProjectionFrame.RequestSabMode(1))
         },
-        copy = englishClusterText
+        copy = englishClusterText,
+        musicState = null,
+        navInstruction = null,
+        activeCall = null,
+        currentMessage = null,
+        musicLoadingPageFactory = null,
+        messageMenuPageFactory = null
     )
 
     private fun openAction(page: RootMenuPageProvider): MirrorAction =
@@ -961,7 +967,14 @@ class RootMenuPageProviderTest {
         val page = RootMenuPageProvider(
             entries = allRootMenuEntries(),
             pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = ClusterTextResolver { "[${it.name}]" }
+            copy = ClusterTextResolver { "[${it.name}]" },
+            musicState = null,
+            navInstruction = null,
+            activeCall = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
 
         val headers = RootMenuItem.entries.indices.map { index ->
@@ -994,7 +1007,13 @@ class RootMenuPageProviderTest {
             entries = allRootMenuEntries(),
             activeCall = activeCall,
             pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = ClusterTextResolver { "[${it.name}]" }
+            copy = ClusterTextResolver { "[${it.name}]" },
+            musicState = null,
+            navInstruction = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
         repeat(RootMenuItem.entries.indexOf(RootMenuItem.CALL)) { page.onInput(FunctionId.NEXT) }
 
@@ -1071,7 +1090,14 @@ class RootMenuPageProviderTest {
         val page = RootMenuPageProvider(
             entries = entriesFlow,
             pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = englishClusterText
+            copy = englishClusterText,
+            musicState = null,
+            navInstruction = null,
+            activeCall = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
         page.speech.test {
             assertEquals(SpeechToken.ROOT_WEATHER_EMPTY, awaitItem().single().token)
@@ -1093,7 +1119,14 @@ class RootMenuPageProviderTest {
         val page = RootMenuPageProvider(
             entries = entriesFlow,
             pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = englishClusterText
+            copy = englishClusterText,
+            musicState = null,
+            navInstruction = null,
+            activeCall = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
         page.speech.test {
             assertEquals(SpeechToken.ROOT_WEATHER_EMPTY, awaitItem().single().token)
@@ -1117,7 +1150,14 @@ class RootMenuPageProviderTest {
         val page = RootMenuPageProvider(
             entries = entriesFlow,
             pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-            copy = englishClusterText
+            copy = englishClusterText,
+            musicState = null,
+            navInstruction = null,
+            activeCall = null,
+            currentWeather = null,
+            currentMessage = null,
+            musicLoadingPageFactory = null,
+            messageMenuPageFactory = null
         )
         page.speech.test {
             assertEquals(SpeechToken.ROOT_WEATHER_EMPTY, awaitItem().single().token)

@@ -84,6 +84,16 @@ class SabSession(
         synchronized(closeActions) { closeActions.add(name to action) }
     }
 
+    /**
+     * Registers [action] under [name] unless an action of that name is already registered: for a
+     * cleanup asked for every time something is requested again, which must still run only once.
+     */
+    fun onCloseOnce(name: String, action: suspend () -> Unit) {
+        synchronized(closeActions) {
+            if (closeActions.none { it.first == name }) closeActions.add(name to action)
+        }
+    }
+
     /** For the link watcher and anything else that only gets to ask: the owner decides. */
     fun requestClose(reason: CloseReason) {
         onCloseRequested(this, reason)
@@ -104,8 +114,13 @@ class SabSession(
         try {
             withContext(confinedDispatcher + NonCancellable) {
                 for ((name, action) in actions) {
-                    runCatchingCancellable { action() }
-                        .onFailure { Log.w(it, "SabSession #%d close action %s failed", id, name) }
+                    // Not runCatchingCancellable: nothing cancels this loop, so a CancellationException
+                    // here is a withTimeout inside the action, and it must not skip the rest.
+                    try {
+                        action()
+                    } catch (failure: Exception) {
+                        Log.w(failure, "SabSession #%d close action %s failed", id, name)
+                    }
                 }
             }
             // The session log's "closed in" line is what ends a session for anyone reading the log; a

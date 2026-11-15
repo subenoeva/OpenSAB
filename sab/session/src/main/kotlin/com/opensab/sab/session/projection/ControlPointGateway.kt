@@ -10,12 +10,12 @@ import com.opensab.sab.session.coroutines.isCancellationOfTheCaller
 import com.opensab.sab.session.coroutines.runCatchingCancellable
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.ArrayDeque
@@ -93,9 +93,12 @@ class DefaultControlPointGateway : ControlPointGateway {
         }
     }
 
+    /** Also drops the cached receipts: they answered this session's frames, not the next one's. */
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun stop() {
         subscriptionJob?.cancel()
         subscriptionJob = null
+        receiptsFlow.resetReplayCache()
         clear()
     }
 
@@ -106,11 +109,14 @@ class DefaultControlPointGateway : ControlPointGateway {
         payload: ByteArray
     ): Receipt {
         synchronized(pendingCommands) { pendingCommands.addLast(payload) }
-        return commandMutex.withLock {
-            val queued = synchronized(pendingCommands) {
-                pendingCommands.remove(payload)
-                pendingCommands.size
-            }
+        try {
+            commandMutex.lock()
+        } finally {
+            // A dispatch cancelled while it waits for the wire must leave the queue too.
+            synchronized(pendingCommands) { pendingCommands.remove(payload) }
+        }
+        return try {
+            val queued = synchronized(pendingCommands) { pendingCommands.size }
             if (queued > 0) {
                 Log.d("Dispatching frame with %d more waiting in the queue", queued)
             }
@@ -120,6 +126,8 @@ class DefaultControlPointGateway : ControlPointGateway {
                 requestId = requestId,
                 payload = payload
             )
+        } finally {
+            commandMutex.unlock()
         }
     }
 

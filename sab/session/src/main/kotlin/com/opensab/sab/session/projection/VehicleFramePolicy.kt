@@ -84,8 +84,7 @@ class VehicleFramePolicy(
         // Indicator masks and control packets carry neither colour nor text.
         is ProjectionFrame.ActiveIndicators,
         is ProjectionFrame.DismissModal,
-        is ProjectionFrame.RequestSabMode,
-        is ProjectionFrame.FirmwareUpdate -> frame
+        is ProjectionFrame.RequestSabMode -> frame
     }
 
     /** Folds the plain message of a queued popup, which never reaches [adapt] as a frame. */

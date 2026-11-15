@@ -290,6 +290,21 @@ class SessionSummarizerTest {
      * (origin=RECEIVER), the given [lines] (one entry each, one millisecond apart, starting at
      * 2026-09-24 20:00:00.000) and, if [closed], the closing and closed-in lines.
      */
+    /** The summary never throws: an entry it cannot read leaves a failed summary that names it. */
+    @Test
+    fun anEntryTheSummarizerCannotReadFailsTheSummaryInsteadOfThrowing() {
+        val bad = "Journal dropped 99999999999 entries between 10:00:00 and 10:00:01"
+        val entries = session("BTU acknowledged frame successfully: commandId=0x01, requestId=6", bad)
+
+        val s = SessionSummarizer().summarize("x", entries)
+
+        assertEquals(listOf(Attention.SUMMARY_FAILED), s.attention)
+        val failure = checkNotNull(s.failure)
+        assertEquals(bad, failure.firstLine)
+        assertEquals(entries.indexOfFirst { it.message == bad }, failure.entryIndex)
+        assertTrue(failure.exception, failure.exception.startsWith("java.lang.NumberFormatException"))
+    }
+
     private fun session(
         vararg lines: String,
         started: Boolean = true,

@@ -13,7 +13,6 @@ import com.opensab.cluster.mirror.MirrorActionToken
 import com.opensab.cluster.mirror.MirrorPage
 import com.opensab.cluster.mirror.MirrorSlot
 import com.opensab.cluster.mirror.mirrorPageOf
-import com.opensab.cluster.redrawOn
 import com.opensab.cluster.text.ClusterTextResolver
 import com.opensab.cluster.text.ClusterToken
 import com.opensab.domain.audio.Cue
@@ -31,10 +30,12 @@ import com.opensab.sab.protocol.projection.ProjectionFrame
 import com.opensab.sab.session.coroutines.runCatchingCancellable
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 
 /**
@@ -107,7 +108,15 @@ class CallMenuPageProvider(
         }.collect { emit(it) }
     }
 
-    override val invalidations: Flow<Unit> = redrawOn(_gates)
+    /**
+     * Owned here, emitted only by [work]. Not `redrawOn(_gates)`: the engine launches the redraw
+     * collector and the work side by side, and gates that arrive before the collector subscribes
+     * would be the replayed value it drops, leaving the frame painted at mount, rows shut, on the
+     * cluster.
+     */
+    private val _redraws = MutableSharedFlow<Unit>()
+
+    override val invalidations: Flow<Unit> = _redraws.asSharedFlow()
 
     /**
      * One read of the two permissions and the address book, then nothing.
@@ -125,8 +134,14 @@ class CallMenuPageProvider(
      * changed while the rider was away, since revoking a permission kills the process.
      */
     override suspend fun work(): NavigationAction {
-        _gates.value = runCatchingCancellable { access.gates() }.getOrDefault(CallMenuGates.CLOSED)
-        Log.d("Call menu gates: %s", _gates.value)
+        val before = _gates.value
+        val gates = runCatchingCancellable { access.gates() }.getOrDefault(CallMenuGates.CLOSED)
+        _gates.value = gates
+        Log.d("Call menu gates: %s", gates)
+        if (gates != before) {
+            _redraws.subscriptionCount.first { it > 0 }
+            _redraws.emit(Unit)
+        }
         awaitCancellation()
     }
 

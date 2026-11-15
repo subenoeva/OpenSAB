@@ -34,8 +34,8 @@ class PriorityInterruptSourceTest {
         val activeCall = MutableStateFlow<CallInfo?>(null)
         val message = MockMessageSource()
 
-        val callPage = CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter())
-        val messagePage = MessagePageProvider(message.currentMessage, englishClusterText, message)
+        val callPage = CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter(), volumeSource = null)
+        val messagePage = MessagePageProvider(message.currentMessage, englishClusterText, message, canReply = MutableStateFlow(false), volumeSource = null)
 
         val interrupts = PriorityInterruptSource(
             CallInterruptSource(activeCall, MutableStateFlow(InboundCallMode.ALERT)) { callPage },

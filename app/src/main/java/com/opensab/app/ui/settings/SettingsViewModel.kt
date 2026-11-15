@@ -15,6 +15,8 @@ import com.opensab.domain.music.MediaLibraryBrowser
 import com.opensab.domain.settings.SessionLogLimit
 import com.opensab.domain.settings.SettingsRepository
 import com.opensab.domain.settings.resolveVerboseLogging
+import com.opensab.sab.session.SabSessionState
+import com.opensab.sab.session.SabSessions
 import com.opensab.sab.session.crypto.SecureKeyStore
 import com.opensab.sab.session.vehicle.VehicleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,8 +42,9 @@ class SettingsViewModel @Inject constructor(
     private val permissionStatusReader: PermissionStatusReader,
     private val journalUsage: JournalUsageSource,
     @DebuggableBuild private val isDebuggable: Boolean,
-    private val mediaControllerAdapter: MediaControllerAdapter? = null,
-    private val libraryBrowser: MediaLibraryBrowser? = null
+    private val mediaControllerAdapter: MediaControllerAdapter?,
+    private val libraryBrowser: MediaLibraryBrowser?,
+    private val sabSessions: SabSessions
 ) : BaseViewModel<SettingsUiState, SettingsUiIntent, SettingsUiEvent>(SettingsUiState()) {
 
     init {
@@ -145,7 +148,11 @@ class SettingsViewModel @Inject constructor(
 
     private fun startColdStartCountdown() {
         countdownJob?.cancel()
-        mediaControllerAdapter?.start(viewModelScope)
+        // A live session owns the adapter; attaching it here would take it from the session and
+        // tie its collectors to this screen.
+        if (sabSessions.state.value !is SabSessionState.Connected) {
+            mediaControllerAdapter?.start(viewModelScope)
+        }
         countdownJob = viewModelScope.launch {
             for (i in 5 downTo 1) {
                 updateState { copy(coldStartCountdown = i) }

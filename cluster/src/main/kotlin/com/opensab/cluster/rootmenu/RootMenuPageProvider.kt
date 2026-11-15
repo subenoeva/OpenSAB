@@ -111,16 +111,16 @@ private fun itemsOf(entries: List<RootMenuEntry>): List<RootMenuItem> =
  */
 class RootMenuPageProvider(
     private val entries: StateFlow<List<RootMenuEntry>>,
-    private val musicState: StateFlow<MusicState>? = null,
-    private val navInstruction: StateFlow<NavInstruction?>? = null,
-    private val activeCall: StateFlow<CallInfo?>? = null,
-    private val currentWeather: StateFlow<WeatherInfo?>? = null,
-    private val currentMessage: StateFlow<MessageInfo?>? = null,
+    private val musicState: StateFlow<MusicState>?,
+    private val navInstruction: StateFlow<NavInstruction?>?,
+    private val activeCall: StateFlow<CallInfo?>?,
+    private val currentWeather: StateFlow<WeatherInfo?>?,
+    private val currentMessage: StateFlow<MessageInfo?>?,
     private val pageFactory: (RootMenuItem) -> PageProvider,
     /** No default: one would be a page painting English because the graph forgot. */
     private val copy: ClusterTextResolver,
-    private val musicLoadingPageFactory: (() -> PageProvider)? = null,
-    private val messageMenuPageFactory: (() -> PageProvider)? = null
+    private val musicLoadingPageFactory: (() -> PageProvider)?,
+    private val messageMenuPageFactory: (() -> PageProvider)?
 ) : CuingPage, SpeakingPage {
 
     override val name: String = "RootMenu"

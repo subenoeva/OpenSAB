@@ -1,5 +1,6 @@
 package com.opensab.sab.session.ble
 
+import java.util.UUID
 import kotlinx.coroutines.CancellableContinuation
 import kotlin.coroutines.resumeWithException
 
@@ -24,7 +25,9 @@ sealed class GattOp<T>(val label: String) {
 class PendingGattOperations {
 
     private val lock = Any()
-    private val slots = HashMap<GattOp<*>, CancellableContinuation<*>>()
+    private class Slot(val continuation: CancellableContinuation<*>, val target: UUID?)
+
+    private val slots = HashMap<GattOp<*>, Slot>()
 
     /** Set by [failAll]: the link is dead, so no callback will ever answer what is armed after it. */
     private var droppedBy: Throwable? = null
@@ -33,13 +36,15 @@ class PendingGattOperations {
      * An occupant that is no longer active was cancelled by the watchdog before anything cleared its
      * slot, a legitimate race, so it is replaced without a word. An active one means two operations
      * of one kind are in flight, which [SerializedGattQueue] rules out: that is a broken invariant.
+     *
+     * [target] is the characteristic the operation is about, `null` for the link-wide ones.
      */
-    fun <T> arm(op: GattOp<T>, continuation: CancellableContinuation<T>) {
+    fun <T> arm(op: GattOp<T>, continuation: CancellableContinuation<T>, target: UUID? = null) {
         synchronized(lock) {
             droppedBy?.let { throw BleDisconnectedException("${op.label} armed after the link dropped", it) }
             val occupant = slots[op]
-            check(occupant == null || !occupant.isActive) { "${op.label} is already in flight" }
-            slots[op] = continuation
+            check(occupant == null || !occupant.continuation.isActive) { "${op.label} is already in flight" }
+            slots[op] = Slot(continuation, target)
         }
     }
 
@@ -48,10 +53,19 @@ class PendingGattOperations {
         synchronized(lock) { slots.remove(op) }
     }
 
-    /** False when nobody is waiting any more, typically a callback arriving after the watchdog. */
-    fun <T> complete(op: GattOp<T>, result: Result<T>): Boolean {
+    /**
+     * False when nobody is waiting any more, typically a callback arriving after the watchdog. A
+     * callback about another characteristic than the armed one is the late answer of an operation
+     * the watchdog already gave up on: it is dropped and the slot keeps waiting for its own.
+     */
+    fun <T> complete(op: GattOp<T>, result: Result<T>, target: UUID? = null): Boolean {
+        val slot = synchronized(lock) {
+            val armed = slots[op] ?: return false
+            if (target != null && armed.target != null && armed.target != target) return false
+            slots.remove(op)
+        }
         @Suppress("UNCHECKED_CAST")
-        val continuation = synchronized(lock) { slots.remove(op) } as CancellableContinuation<T>?
+        val continuation = slot?.continuation as CancellableContinuation<T>?
         if (continuation == null || !continuation.isActive) return false
         continuation.resumeWith(result)
         return true
@@ -65,7 +79,7 @@ class PendingGattOperations {
     fun failAll(cause: Throwable) {
         val waiting = synchronized(lock) {
             droppedBy = cause
-            slots.values.toList().also { slots.clear() }
+            slots.values.map { it.continuation }.also { slots.clear() }
         }
         waiting.filter { it.isActive }.forEach { it.resumeWithException(cause) }
     }

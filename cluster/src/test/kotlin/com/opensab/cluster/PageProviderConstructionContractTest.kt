@@ -161,7 +161,9 @@ class PageProviderConstructionContractTest {
                     currentWeather = rootWeather,
                     currentMessage = rootMessage,
                     pageFactory = { stubPage() },
-                    copy = englishClusterText
+                    copy = englishClusterText,
+                    musicLoadingPageFactory = null,
+                    messageMenuPageFactory = null
                 )
             },
 
@@ -250,6 +252,7 @@ class PageProviderConstructionContractTest {
                     messageSource = replySource,
                     sentLinger = replyLinger,
                     copy = englishClusterText,
+                    quickReplies = MutableStateFlow(emptyList()),
                     volumeSource = replyVolume
                 )
             },
@@ -330,6 +333,7 @@ class PageProviderConstructionContractTest {
                     smsSender = composeSender,
                     sentLinger = composeLinger,
                     copy = englishClusterText,
+                    quickReplies = MutableStateFlow(emptyList()),
                     volumeSource = composeVolume
                 )
             },

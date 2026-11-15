@@ -1,5 +1,6 @@
 package com.opensab.app.e2e
 
+import com.opensab.domain.settings.VoiceVerbosity
 import androidx.lifecycle.ViewModelStore
 import com.opensab.app.ble.GattTransportFactory
 import com.opensab.app.di.MessageModule
@@ -293,7 +294,7 @@ class SessionHarness(
         capabilities = capabilities,
         activeIndicators = indicators,
         projectionMirror = mirror,
-        pageVoice = PageVoice(speechResolver, spoken, sessionScope = sessionScope),
+        pageVoice = PageVoice(speechResolver, spoken, sessionScope = sessionScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }),
         cuePlayer = wrappedCuePlayer,
         pageFactory = pageFactory
     )

@@ -96,7 +96,7 @@ class NavigationPageProviderTest {
     @Test
     fun `renders standby screen when no navigation instruction is active`() {
         val navManager = RecordingNavigationManager()
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         val frame = provider.render(requestId = 102) as ProjectionFrame.LiveScreen
         assertEquals(102, frame.requestId)
@@ -110,7 +110,7 @@ class NavigationPageProviderTest {
     @Test
     fun `back button pops back to root menu`() {
         val navManager = RecordingNavigationManager()
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         val action = provider.onInput(FunctionId.BACK)
         assertEquals(NavigationAction.Pop, action)
@@ -119,7 +119,7 @@ class NavigationPageProviderTest {
     @Test
     fun `menu button resets back to root menu`() {
         val navManager = RecordingNavigationManager()
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         val action = provider.onInput(FunctionId.MENU)
         assertEquals(NavigationAction.Reset, action)
@@ -128,7 +128,7 @@ class NavigationPageProviderTest {
     @Test
     fun `select button triggers repeat maneuver on navigationManager and returns none`() {
         val navManager = RecordingNavigationManager()
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         val action = provider.onInput(FunctionId.SELECT)
         assertEquals(NavigationAction.None, action)
@@ -203,7 +203,7 @@ class NavigationPageProviderTest {
     @Test
     fun `retains state on resume`() {
         val navManager = RecordingNavigationManager()
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         assertEquals(ResumeBehavior.RETAIN, provider.onResumeBehavior)
         assertEquals("NavigationPage", provider.name)
@@ -227,7 +227,8 @@ class NavigationPageProviderTest {
         val provider = NavigationPageProvider(
             navInstruction = navManager.currentInstruction,
             copy = { "[${it.name}]" },
-            navigationManager = navManager
+            navigationManager = navManager,
+            volumeSource = null
         )
         navManager.state.value = NavInstruction(
             title = "Turn right",
@@ -248,7 +249,8 @@ class NavigationPageProviderTest {
         val provider = NavigationPageProvider(
             navInstruction = navManager.currentInstruction,
             copy = { "[${it.name}]" },
-            navigationManager = navManager
+            navigationManager = navManager,
+            volumeSource = null
         )
 
         val frame = provider.render(requestId = 2) as ProjectionFrame.LiveScreen
@@ -271,7 +273,7 @@ class NavigationPageProviderTest {
                 maneuver = ManeuverType.TURN_LEFT
             )
         )
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         provider.onInput(FunctionId.SELECT)
 
@@ -297,7 +299,7 @@ class NavigationPageProviderTest {
                 maneuver = ManeuverType.UNKNOWN
             )
         )
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         provider.onInput(FunctionId.SELECT)
 
@@ -321,7 +323,7 @@ class NavigationPageProviderTest {
             navManager.updateInstruction(
                 NavInstruction(title = "", streetName = "", distanceFormatted = "100 m", maneuver = maneuver)
             )
-            val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+            val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
             provider.onInput(FunctionId.SELECT)
 
@@ -336,7 +338,7 @@ class NavigationPageProviderTest {
     @Test
     fun `select without guidance says nothing`() = runTest {
         val navManager = RecordingNavigationManager()
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         provider.onInput(FunctionId.SELECT)
 
@@ -350,7 +352,7 @@ class NavigationPageProviderTest {
         navManager.updateInstruction(
             NavInstruction("250 m", "Calle Mayor", "250 m", ManeuverType.TURN_RIGHT)
         )
-        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager)
+        val provider = NavigationPageProvider(navManager.currentInstruction, englishClusterText, navManager, volumeSource = null)
 
         assertNull(withTimeoutOrNull(1.seconds) { provider.speech.first() })
     }

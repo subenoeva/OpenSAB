@@ -1,5 +1,6 @@
 package com.opensab.cluster
 
+import com.opensab.domain.settings.VoiceVerbosity
 import com.opensab.domain.audio.AudioFocusKind
 import com.opensab.domain.audio.RecordingAudioFocus
 import com.opensab.domain.speech.MockSpeechSynthesizer
@@ -45,7 +46,7 @@ class PageVoiceAudioFocusTest {
         val focus = RecordingAudioFocus()
         val synthesizer = MockSpeechSynthesizer()
 
-        PageVoice(naming, synthesizer, focus, sessionScope = backgroundScope).say(listOf(header, body))
+        PageVoice(naming, synthesizer, focus, sessionScope = backgroundScope, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(listOf(header, body))
         advanceTimeBy(500.milliseconds)
         runCurrent()
 
@@ -62,7 +63,7 @@ class PageVoiceAudioFocusTest {
     fun asksForTheFocusOnceForTheWholeScript() = runTest {
         val focus = RecordingAudioFocus()
 
-        PageVoice(naming, MockSpeechSynthesizer(), focus, sessionScope = backgroundScope).say(listOf(header, body, header))
+        PageVoice(naming, MockSpeechSynthesizer(), focus, sessionScope = backgroundScope, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(listOf(header, body, header))
 
         assertEquals(1, focus.requests.size)
     }
@@ -72,7 +73,7 @@ class PageVoiceAudioFocusTest {
     fun givesTheFocusBackWhenTheVoiceIsCutMidScript() = runTest {
         val focus = RecordingAudioFocus()
         val synthesizer = MockSpeechSynthesizer().apply { speaksUntilStopped = true }
-        val voice = PageVoice(naming, synthesizer, focus, sessionScope = backgroundScope)
+        val voice = PageVoice(naming, synthesizer, focus, sessionScope = backgroundScope, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false })
 
         val job = launch { voice.say(listOf(header, body)) }
         runCurrent()
@@ -95,7 +96,7 @@ class PageVoiceAudioFocusTest {
         val focus = RecordingAudioFocus(granted = false)
         val synthesizer = MockSpeechSynthesizer()
 
-        PageVoice(naming, synthesizer, focus, sessionScope = backgroundScope).say(listOf(header, body))
+        PageVoice(naming, synthesizer, focus, sessionScope = backgroundScope, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(listOf(header, body))
 
         assertEquals(
             listOf("said:WEATHER_FORECAST_MESSAGE", "said:MESSAGE_READ"),
@@ -108,7 +109,7 @@ class PageVoiceAudioFocusTest {
     fun anEmptyScriptTakesNoFocus() = runTest {
         val focus = RecordingAudioFocus()
 
-        PageVoice(naming, MockSpeechSynthesizer(), focus, sessionScope = backgroundScope).say(emptyList())
+        PageVoice(naming, MockSpeechSynthesizer(), focus, sessionScope = backgroundScope, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false }).say(emptyList())
 
         assertTrue("the voice ducked the music with nothing to say", focus.requests.isEmpty())
     }

@@ -224,6 +224,24 @@ class ActiveIndicatorsPublisherTest {
      * The consequence, stated on its own because it is the part that never heals: the phone would
      * keep an icon lit on the cluster that the app believes it turned off, for the rest of the ride.
      */
+    /**
+     * A mask whose write failed never reached the cluster. Taking it for projected would leave the
+     * bar stale until some other bit moved, because an unchanged mask is not re-sent.
+     */
+    @Test
+    fun `a mask whose write failed goes out again on the next publish`() = testScope.runTest {
+        val projector = GatedIndicatorProjector()
+        val publisher = ActiveIndicatorsPublisher(projector)
+
+        projector.failNextWrite = true
+        publisher.set(ActiveIndicator.MUSIC, true)
+        publisher.set(ActiveIndicator.MUSIC, true)
+        publisher.set(ActiveIndicator.MUSIC, true)
+
+        assertEquals("one write that lands, after the one that failed", listOf(0x04), projector.masks)
+        assertEquals(setOf(ActiveIndicator.MUSIC), publisher.state.value)
+    }
+
     @Test
     fun `an indicator turned off while another write is in flight really goes out`() = testScope.runTest {
         val projector = GatedIndicatorProjector()
@@ -256,6 +274,9 @@ class ActiveIndicatorsPublisherTest {
     private class GatedIndicatorProjector : ScreenProjector {
 
         val masks = mutableListOf<Int>()
+
+        /** Set by a test: the next write fails instead of reaching the cluster. */
+        var failNextWrite = false
 
         /** Armed by [gateNextWrite]; the next write takes it and parks on it. */
         private var armed: CompletableDeferred<Unit>? = null
@@ -293,6 +314,10 @@ class ActiveIndicatorsPublisherTest {
         override suspend fun dismissActivePopUp(): Result<Unit> = Result.success(Unit)
 
         override suspend fun updateActiveIndicators(mask: Int): Result<Receipt> {
+            if (failNextWrite) {
+                failNextWrite = false
+                return Result.failure(ProjectionTimeoutException("no Receipt"))
+            }
             armed?.let { gate ->
                 armed = null
                 held = gate

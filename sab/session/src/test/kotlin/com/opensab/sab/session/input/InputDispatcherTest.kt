@@ -778,4 +778,27 @@ class InputDispatcherTest {
         assertTrue(recordedLines.none { it.startsWith("Handlebar press") })
         dispatcher.stopListening()
     }
+
+    /** Out of range is 0x00 and 0x0B: no event, a warning with the bytes, and the loop keeps going. */
+    @Test
+    fun anOutOfRangeByteEmitsNothingAndTheNextPressStillArrives() = testScope.runTest {
+        val (dispatcher, transport) = listeningDispatcher()
+        val received = mutableListOf<HandlebarEvent>()
+        backgroundScope.launch { dispatcher.events.collect { received += it } }
+
+        listOf(0x00, 0x0B, 0x04).forEach {
+            transport.emitNotification(
+                SabGattUuids.SERVICE_DATA_COMM,
+                SabGattUuids.CHAR_FUNCTION_NOTIFICATION,
+                byteArrayOf(it.toByte())
+            )
+        }
+        runCurrent()
+
+        assertEquals(listOf(FunctionId.SELECT), received.map { (it as HandlebarEvent.ButtonPressed).functionId })
+        assertTrue("got: $recordedLines", recordedLines.contains("Unrecognized notification payload: 00"))
+        assertTrue("got: $recordedLines", recordedLines.contains("Unrecognized notification payload: 0B"))
+        assertEquals(DashboardMode.HU_MODE, dispatcher.currentMode.value)
+        dispatcher.stopListening()
+    }
 }

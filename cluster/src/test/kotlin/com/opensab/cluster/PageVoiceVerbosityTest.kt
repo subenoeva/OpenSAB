@@ -53,7 +53,8 @@ class PageVoiceVerbosityTest {
             synthesizer = synthesizer,
             audioFocus = focus,
             verbosity = { VoiceVerbosity.NONE },
-            sessionScope = backgroundScope
+            sessionScope = backgroundScope,
+            inCall = { false }
         )
 
         voice.say(listOf(header))
@@ -73,7 +74,8 @@ class PageVoiceVerbosityTest {
             synthesizer = synthesizer,
             audioFocus = focus,
             verbosity = { VoiceVerbosity.STANDARD },
-            sessionScope = backgroundScope
+            sessionScope = backgroundScope,
+            inCall = { false }
         )
 
         voice.say(listOf(header))
@@ -93,7 +95,8 @@ class PageVoiceVerbosityTest {
             synthesizer = synthesizer,
             audioFocus = focus,
             verbosity = { VoiceVerbosity.ADVANCED },
-            sessionScope = backgroundScope
+            sessionScope = backgroundScope,
+            inCall = { false }
         )
 
         voice.say(listOf(header))
@@ -117,7 +120,8 @@ class PageVoiceVerbosityTest {
             synthesizer = synthesizer,
             audioFocus = focus,
             verbosity = { currentMode },
-            sessionScope = backgroundScope
+            sessionScope = backgroundScope,
+            inCall = { false }
         )
 
         voice.say(listOf(header))
@@ -142,7 +146,8 @@ class PageVoiceVerbosityTest {
             synthesizer = synthesizer,
             audioFocus = focus,
             verbosity = { VoiceVerbosity.ADVANCED },
-            sessionScope = backgroundScope
+            sessionScope = backgroundScope,
+            inCall = { false }
         )
 
         val job = launch { voice.say(listOf(header)) }

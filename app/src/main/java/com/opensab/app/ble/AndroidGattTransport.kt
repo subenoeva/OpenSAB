@@ -158,7 +158,7 @@ class AndroidGattTransport(
     ): Result<ByteArray> = runCatchingCancellable {
         val characteristic = requireCharacteristic(serviceUuid, characteristicUuid)
         operationQueue.execute("Read of $characteristicUuid") {
-            await(GattOp.Read, "Read of $characteristicUuid") {
+            await(GattOp.Read, "Read of $characteristicUuid", characteristicUuid) {
                 GattOutcomes.legacySubmitCode(requireGatt().readCharacteristic(characteristic))
             }
         }
@@ -178,7 +178,7 @@ class AndroidGattTransport(
         }
 
         operationQueue.execute("Write to $characteristicUuid") {
-            await(GattOp.Write, "Write to $characteristicUuid") {
+            await(GattOp.Write, "Write to $characteristicUuid", characteristicUuid) {
                 submitWrite(characteristic, payload, writeType).also { status ->
                     // 201 is ERROR_GATT_WRITE_REQUEST_BUSY: the stack still holds an earlier operation.
                     if (status != GattOutcomes.SUBMIT_ACCEPTED) {
@@ -195,9 +195,9 @@ class AndroidGattTransport(
      * Arms [op], submits it and suspends until the callback bridge completes it. A refused submit
      * disarms the slot and fails at once, since no callback will come.
      */
-    private suspend fun <T> await(op: GattOp<T>, what: String, submit: () -> Int): T =
+    private suspend fun <T> await(op: GattOp<T>, what: String, target: UUID? = null, submit: () -> Int): T =
         suspendCancellableCoroutine { continuation ->
-            pending.arm(op, continuation)
+            pending.arm(op, continuation, target)
             val code = try {
                 submit()
             } catch (e: Exception) {
@@ -279,7 +279,7 @@ class AndroidGattTransport(
         val value = cccdValue(enabled, supportsIndicate)
 
         operationQueue.execute("CCCD write for $characteristicUuid") {
-            await(GattOp.DescriptorWrite, "CCCD write for $characteristicUuid") {
+            await(GattOp.DescriptorWrite, "CCCD write for $characteristicUuid", characteristicUuid) {
                 submitDescriptorWrite(activeGatt, descriptor, value).also { status ->
                     if (status != GattOutcomes.SUBMIT_ACCEPTED) {
                         Log.w("GATT refused the CCCD write for %s: status=%d", characteristicUuid, status)
@@ -338,7 +338,7 @@ class AndroidGattTransport(
             characteristic: BluetoothGattCharacteristic,
             value: ByteArray,
             status: Int
-        ) = finish(GattOp.Read, GattOutcomes.operation("Read of ${characteristic.uuid}", status, value))
+        ) = finish(GattOp.Read, GattOutcomes.operation("Read of ${characteristic.uuid}", status, value), characteristic.uuid)
 
         @Deprecated("Framework calls this overload below API 33", level = DeprecationLevel.HIDDEN)
         override fun onCharacteristicRead(
@@ -348,7 +348,7 @@ class AndroidGattTransport(
         ) {
             @Suppress("DEPRECATION")
             val value = characteristic.value ?: ByteArray(0)
-            finish(GattOp.Read, GattOutcomes.operation("Read of ${characteristic.uuid}", status, value))
+            finish(GattOp.Read, GattOutcomes.operation("Read of ${characteristic.uuid}", status, value), characteristic.uuid)
         }
 
         override fun onCharacteristicWrite(
@@ -356,7 +356,7 @@ class AndroidGattTransport(
             characteristic: BluetoothGattCharacteristic,
             status: Int
         ) {
-            finish(GattOp.Write, GattOutcomes.operation("Write to ${characteristic.uuid}", status, Unit))
+            finish(GattOp.Write, GattOutcomes.operation("Write to ${characteristic.uuid}", status, Unit), characteristic.uuid)
         }
 
         override fun onCharacteristicChanged(
@@ -382,7 +382,8 @@ class AndroidGattTransport(
             status: Int
         ) = finish(
             GattOp.DescriptorWrite,
-            GattOutcomes.operation("CCCD write for ${descriptor.characteristic.uuid}", status, Unit)
+            GattOutcomes.operation("CCCD write for ${descriptor.characteristic.uuid}", status, Unit),
+            descriptor.characteristic.uuid
         )
     }
 
@@ -393,9 +394,11 @@ class AndroidGattTransport(
      * when nobody waits any more, which is exactly what happens when the watchdog already fired.
      * Without this line that late status would vanish without trace.
      */
-    private fun <T> finish(op: GattOp<T>, result: Result<T>) {
+    private fun <T> finish(op: GattOp<T>, result: Result<T>, target: UUID? = null) {
         result.onFailure { Log.w(it.message) }
-        pending.complete(op, result)
+        if (!pending.complete(op, result, target) && target != null) {
+            Log.w("Dropped a late %s callback for %s: nobody is waiting for it", op.label, target)
+        }
     }
 
     // endregion

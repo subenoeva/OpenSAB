@@ -1,9 +1,12 @@
 package com.opensab.domain.weather
 
 import com.opensab.domain.settings.TemperatureUnit
+import com.opensab.logging.Log
+import com.opensab.logging.LogSink
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceTimeBy
@@ -31,9 +34,11 @@ class DefaultWeatherSourceTest {
     private class FakeHttpGetClient : HttpGetClient {
         val urls = mutableListOf<String>()
         var respond: (String) -> String = { bodyFor(temperature = "21.6", code = "2") }
+        var hangs = false
 
         override suspend fun get(url: String): String {
             urls += url
+            if (hangs) awaitCancellation()
             return respond(url)
         }
     }
@@ -229,6 +234,48 @@ class DefaultWeatherSourceTest {
         assertEquals(1, http.urls.size)
 
         http.respond = { bodyFor(temperature = "21.6", code = "2") }
+        advanceTimeBy(1.minutes)
+        runCurrent()
+
+        assertEquals(2, http.urls.size)
+        assertEquals(22, weather.currentWeather.value?.temperature)
+    }
+
+    @Test
+    fun stoppingMidRequestIsNotAFailedRequest() = runTest {
+        val http = FakeHttpGetClient().apply { hangs = true }
+        val weather = source(FakeLocationSource(madrid), http, FakeWeatherCache()) {
+            testScheduler.currentTime
+        }
+        val warnings = mutableListOf<String?>()
+        val sink = LogSink { priority, _, message, _ -> if (priority == Log.WARN) warnings += message }
+        Log.install(sink)
+        try {
+            weather.start(backgroundScope)
+            runCurrent()
+            assertEquals(1, http.urls.size)
+
+            weather.stop()
+            runCurrent()
+
+            assertEquals(emptyList<String?>(), warnings)
+        } finally {
+            Log.uninstall(sink)
+        }
+    }
+
+    @Test
+    fun aRequestThatTimesOutStillReadsAsFailed() = runTest {
+        val http = FakeHttpGetClient().apply { hangs = true }
+        val weather = source(FakeLocationSource(madrid), http, FakeWeatherCache()) {
+            testScheduler.currentTime
+        }
+
+        weather.start(backgroundScope)
+        runCurrent()
+        advanceTimeBy(10.seconds)
+        runCurrent()
+        http.hangs = false
         advanceTimeBy(1.minutes)
         runCurrent()
 

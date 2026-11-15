@@ -51,7 +51,8 @@ class NavVoiceSearchPageProviderTest {
             unlockSource = unlocks,
             navInstructionFlow = instructionFlow,
             livePageFactory = { livePage },
-            copy = copy
+            copy = copy,
+            volumeSource = null
         )
 
     @Test
@@ -496,7 +497,8 @@ class NavVoiceSearchPageProviderTest {
             navInstructionFlow = instructionFlow,
             livePageFactory = { livePage },
             copy = copy,
-            tbtWatchdogTimeout = 100.milliseconds
+            tbtWatchdogTimeout = 100.milliseconds,
+            volumeSource = null
         )
         val workJob = launch { page.work() }
         runCurrent()

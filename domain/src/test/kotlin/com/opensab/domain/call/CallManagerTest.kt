@@ -1,6 +1,7 @@
 package com.opensab.domain.call
 
 import com.opensab.logging.Log
+import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.logging.LogSink
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ class CallManagerTest {
 
     private fun manager(nowMillis: () -> Long = { FIRST_STAMP }) = DefaultCallManager(
         notifications = bus,
+        audioFocus = NoAudioFocus,
         nowMillis = nowMillis
     )
 
@@ -202,6 +204,54 @@ class CallManagerTest {
         runCurrent()
 
         assertEquals("Laura", callManager.activeCall.value?.callerName)
+
+        callManager.stop()
+    }
+
+    /**
+     * A second call over a live one takes the screen; when it goes, the first is still live and
+     * comes back, with its own commands. Forgetting it gave the music back in the middle of a call.
+     */
+    @Test
+    fun removingTheNewerOfTwoLiveCallsFallsBackToTheOlderOne() = testScope.runTest {
+        var now = FIRST_STAMP
+        val callManager = manager { now }
+        callManager.start(backgroundScope)
+        runCurrent()
+        val firstCommands = CountingCallCommands()
+
+        bus.post(ringing(commands = firstCommands))
+        runCurrent()
+        now = SECOND_STAMP
+        bus.post(ringing(key = OTHER_KEY, title = "Marta"))
+        runCurrent()
+        bus.post(CallNotificationEvent.Removed(OTHER_KEY))
+        runCurrent()
+
+        assertEquals("Laura", callManager.activeCall.value?.callerName)
+        assertEquals(FIRST_STAMP, callManager.activeCall.value?.timestamp)
+        callManager.acceptCall()
+        assertEquals(1, firstCommands.answers)
+
+        callManager.stop()
+    }
+
+    @Test
+    fun removingTheOlderOfTwoLiveCallsLeavesTheNewerOnScreen() = testScope.runTest {
+        val callManager = manager()
+        callManager.start(backgroundScope)
+        runCurrent()
+
+        bus.post(ringing())
+        runCurrent()
+        bus.post(ringing(key = OTHER_KEY, title = "Marta"))
+        runCurrent()
+        bus.post(CallNotificationEvent.Removed(DIALER_KEY))
+        runCurrent()
+        bus.post(CallNotificationEvent.Removed(OTHER_KEY))
+        runCurrent()
+
+        assertNull(callManager.activeCall.value)
 
         callManager.stop()
     }

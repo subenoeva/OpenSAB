@@ -14,6 +14,7 @@ import com.opensab.sab.session.SessionOrigin
 import com.opensab.sab.session.crypto.SecuritySession
 import com.opensab.sab.session.markConnectedForTest
 import com.opensab.sab.session.vehicle.KnownVehicle
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -24,6 +25,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SessionAnnouncerTest {
 
     @Test

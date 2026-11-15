@@ -2,8 +2,7 @@ package com.opensab.sab.session
 
 import com.opensab.logging.Log
 import com.opensab.sab.session.ble.DeviceBonder
-import com.opensab.sab.session.coroutines.runCatchingCancellable
-import kotlinx.coroutines.CancellationException
+import com.opensab.sab.session.coroutines.isCancellationOfTheCaller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -299,7 +298,9 @@ class SabSessionController(
 
     private suspend fun runAttempt(session: SabSession) {
         var bonded = false
-        val outcome = runCatchingCancellable {
+        // Not runCatchingCancellable: a withTimeout inside the pipeline throws a
+        // CancellationException into this still-active coroutine, and that one is a failed attempt.
+        val outcome = try {
             bonder.ensureBonded(session.macAddress).getOrThrow()
             bonded = true
             val transport = links.open(session.macAddress).getOrElse { cause ->
@@ -309,7 +310,15 @@ class SabSessionController(
                 if (liveSession === session) {
                     _state.value = SabSessionState.Connecting(step)
                 }
+            }.let { Result.success(it) }
+        } catch (error: Throwable) {
+            if (error.isCancellationOfTheCaller()) {
+                // The session was closed out from under this attempt — a Disconnect mid-bond, or
+                // REPLACED by another Start. Whoever closed it already published the state.
+                attemptJob = null
+                throw error
             }
+            Result.failure(error)
         }
         outcome.onSuccess { connected ->
             attemptJob = null
@@ -329,11 +338,6 @@ class SabSessionController(
             pipeline.announceOpened(session)
         }.onFailure { error ->
             attemptJob = null
-            if (error is CancellationException) {
-                // The session was closed out from under this attempt — a Disconnect mid-bond, or
-                // REPLACED by another Start. Whoever closed it already published the state.
-                return@onFailure
-            }
             Log.e(error, "Connection pipeline failed, tearing down partial session")
             commands.trySend(Work.Close(session, CloseReason.PIPELINE_FAILED, failure = error, retriable = bonded))
         }

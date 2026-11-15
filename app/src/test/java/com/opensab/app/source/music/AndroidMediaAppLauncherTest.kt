@@ -43,7 +43,10 @@ class AndroidMediaAppLauncherTest {
             browserFactory = fakeBrowserFactory,
             audioKeyDispatcher = fakeAudioKeyDispatcher,
             coroutineScope = testScope,
-            dispatcher = testDispatcher
+            dispatcher = testDispatcher,
+            appOpener = null,
+            sessionSource = null,
+            coldStartMediaIdProvider = { null }
         )
     }
 
@@ -57,7 +60,8 @@ class AndroidMediaAppLauncherTest {
         coroutineScope = testScope,
         dispatcher = testDispatcher,
         appOpener = appOpener,
-        sessionSource = sessionSource
+        sessionSource = sessionSource,
+        coldStartMediaIdProvider = { null }
     )
 
     @Test
@@ -86,6 +90,23 @@ class AndroidMediaAppLauncherTest {
             "Must unsubscribe from root immediately after reading",
             conn.unsubscribedCategories.contains("root")
         )
+    }
+
+    /** A root that cannot be browsed leaves the generic play as the one thing left to try. */
+    @Test
+    fun fallsBackToAGenericPlayWhenTheRootFailsToLoad() = testScope.runTest {
+        val conn = fakeBrowserFactory.getOrCreate("com.spotify.music")
+        conn.failingParents += "root"
+
+        launcher.launchAndPlay("com.spotify.music")
+        testScheduler.runCurrent()
+
+        conn.simulateConnected()
+        testScheduler.runCurrent()
+
+        assertTrue(conn.genericPlayCalled)
+        assertNull(conn.lastPlayedMediaId)
+        assertTrue(conn.unsubscribedCategories.contains("root"))
     }
 
     @Test
@@ -178,6 +199,37 @@ class AndroidMediaAppLauncherTest {
         )
     }
 
+    /** A container the app fails to open is one more container without a track, not the end of the cascade. */
+    @Test
+    fun fallsBackToNextContainerWhenRecentContainerFailsToLoad() = testScope.runTest {
+        val conn = fakeBrowserFactory.getOrCreate("com.aspiro.tidal")
+        conn.rootId = "ROOT_AUTO"
+        conn.rootItems = listOf(
+            MediaBrowserItem("HOME_V2::home_page_v2_id", isPlayable = false, isBrowsable = true),
+            MediaBrowserItem(
+                "RECENTLY_PLAYED::home/pages/CONTINUE_LISTEN_TO/view-all",
+                isPlayable = false,
+                isBrowsable = true
+            )
+        )
+        conn.failingParents += "RECENTLY_PLAYED::home/pages/CONTINUE_LISTEN_TO/view-all"
+        conn.childItems["HOME_V2::home_page_v2_id"] =
+            listOf(MediaBrowserItem("TRACK::545231661", isPlayable = true, isBrowsable = false))
+
+        launcher.launchAndPlay("com.aspiro.tidal")
+        testScheduler.runCurrent()
+
+        conn.simulateConnected(BrowserReady(rootId = "ROOT_AUTO"))
+        testScheduler.runCurrent()
+
+        assertEquals("TRACK::545231661", conn.lastPlayedMediaId)
+        assertTrue(
+            "The failed subscription must be released",
+            "RECENTLY_PLAYED::home/pages/CONTINUE_LISTEN_TO/view-all" in conn.unsubscribedCategories
+        )
+        assertFalse(conn.genericPlayCalled)
+    }
+
     @Test
     fun fallsBackToFirstBrowsableChildWhenNoRecentContainerExists() = testScope.runTest {
         val conn = fakeBrowserFactory.getOrCreate("com.spotify.music")
@@ -214,7 +266,9 @@ class AndroidMediaAppLauncherTest {
             audioKeyDispatcher = fakeAudioKeyDispatcher,
             coroutineScope = testScope,
             dispatcher = testDispatcher,
-            coldStartMediaIdProvider = { "MY_COLLECTION_TRACKS" }
+            coldStartMediaIdProvider = { "MY_COLLECTION_TRACKS" },
+            appOpener = null,
+            sessionSource = null
         )
 
         launcher.launchAndPlay("com.aspiro.tidal")
@@ -245,7 +299,9 @@ class AndroidMediaAppLauncherTest {
             audioKeyDispatcher = fakeAudioKeyDispatcher,
             coroutineScope = testScope,
             dispatcher = testDispatcher,
-            coldStartMediaIdProvider = { "PLAYLIST::deleted" }
+            coldStartMediaIdProvider = { "PLAYLIST::deleted" },
+            appOpener = null,
+            sessionSource = null
         )
 
         launcher.launchAndPlay("com.aspiro.tidal")
@@ -272,7 +328,9 @@ class AndroidMediaAppLauncherTest {
             audioKeyDispatcher = fakeAudioKeyDispatcher,
             coroutineScope = testScope,
             dispatcher = testDispatcher,
-            coldStartMediaIdProvider = { pin.await() }
+            coldStartMediaIdProvider = { pin.await() },
+            appOpener = null,
+            sessionSource = null
         )
 
         launcher.launchAndPlay("com.aspiro.tidal")
@@ -300,7 +358,9 @@ class AndroidMediaAppLauncherTest {
             audioKeyDispatcher = fakeAudioKeyDispatcher,
             coroutineScope = testScope,
             dispatcher = testDispatcher,
-            coldStartMediaIdProvider = { pkg -> if (pkg == "com.aspiro.tidal") pin.await() else null }
+            coldStartMediaIdProvider = { pkg -> if (pkg == "com.aspiro.tidal") pin.await() else null },
+            appOpener = null,
+            sessionSource = null
         )
 
         launcher.launchAndPlay("com.aspiro.tidal")
@@ -329,7 +389,9 @@ class AndroidMediaAppLauncherTest {
             audioKeyDispatcher = fakeAudioKeyDispatcher,
             coroutineScope = testScope,
             dispatcher = testDispatcher,
-            coldStartMediaIdProvider = { pkg -> "MY_COLLECTION_TRACKS".takeIf { pkg == "com.aspiro.tidal" } }
+            coldStartMediaIdProvider = { pkg -> "MY_COLLECTION_TRACKS".takeIf { pkg == "com.aspiro.tidal" } },
+            appOpener = null,
+            sessionSource = null
         )
 
         launcher.launchAndPlay("com.spotify.music")
@@ -927,6 +989,62 @@ class AndroidMediaAppLauncherTest {
         )
         testScheduler.runCurrent()
         assertEquals("Should dispatch second play when transitioning from NONE to PAUSED", 2, fakeSessionSource.playCount)
+    }
+
+    /**
+     * The directed play is sent at most twice per attempt: once when the session shows up, and once
+     * more only if it showed up empty and then loaded. A player that keeps answering PAUSED is not
+     * pushed again on every state it reports.
+     */
+    @Test
+    fun awaitSessionNeverDispatchesMoreThanTwoPlays() = testScope.runTest {
+        val launcherWithAwait = createLauncherWithAwait()
+        val conn = fakeBrowserFactory.getOrCreate("com.spotify.music")
+        launcherWithAwait.launchAndPlay("com.spotify.music")
+        testScheduler.runCurrent()
+        conn.simulateConnectionFailed()
+        testScheduler.runCurrent()
+
+        fun emit(status: PlaybackStatus, title: String) {
+            fakeSessionSource.emit(
+                MediaSessionSnapshot(
+                    packageName = "com.spotify.music",
+                    metadata = TrackMetadata(title, "Artist"),
+                    status = status
+                )
+            )
+            testScheduler.runCurrent()
+        }
+        emit(PlaybackStatus.NONE, "")
+        emit(PlaybackStatus.PAUSED, "Song")
+        emit(PlaybackStatus.STOPPED, "Song")
+        emit(PlaybackStatus.PAUSED, "Other song")
+
+        assertEquals(2, fakeSessionSource.playCount)
+    }
+
+    /** A session that appears already PAUSED gets one play; staying paused does not earn another. */
+    @Test
+    fun awaitSessionDispatchesOnceWhenTheSessionAppearsPaused() = testScope.runTest {
+        val launcherWithAwait = createLauncherWithAwait()
+        val conn = fakeBrowserFactory.getOrCreate("com.spotify.music")
+        launcherWithAwait.launchAndPlay("com.spotify.music")
+        testScheduler.runCurrent()
+        conn.simulateConnectionFailed()
+        testScheduler.runCurrent()
+
+        for (title in listOf("Song", "Song again")) {
+            fakeSessionSource.emit(
+                MediaSessionSnapshot(
+                    packageName = "com.spotify.music",
+                    metadata = TrackMetadata(title, "Artist"),
+                    status = PlaybackStatus.PAUSED
+                )
+            )
+            testScheduler.runCurrent()
+        }
+
+        assertEquals(1, fakeSessionSource.playCount)
     }
 
     @Test

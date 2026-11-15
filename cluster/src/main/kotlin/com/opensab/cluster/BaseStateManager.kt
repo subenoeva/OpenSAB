@@ -39,25 +39,14 @@ class BaseStateManager(
     capabilities: VehicleCapabilitiesHolder,
     private val activeIndicators: ActiveIndicatorsPublisher,
     private val projectionMirror: ProjectionMirror,
-    private val interruptSource: InterruptSource = NoInterruptions,
+    private val interruptSource: InterruptSource,
+    /** The voice of whatever page is mounted, and the reason this class owns [speechJob]. */
+    private val pageVoice: PageVoice?,
     /**
-     * The voice of whatever page is mounted, and the reason this class owns [speechJob].
-     *
-     * Nullable and defaulted for the same reason [interruptSource] is: an engine assembled in a
-     * test that never speaks should not have to declare a voice it does not use. Nothing is hidden
-     * in production — `OrchestratorModule` passes it explicitly, and the graph fails to build if
-     * `SpeechModule` stops providing it.
+     * The cues of the session, and the single owner of the player. It arrives already wrapped in
+     * the decorator that reads the setting, so nothing here knows the setting exists.
      */
-    private val pageVoice: PageVoice? = null,
-    /**
-     * The cues of the session, and the single owner of the player.
-     *
-     * Nullable-free and defaulted like [interruptSource]: an engine assembled in a test that does
-     * not listen should not have to declare a player. Nothing is hidden in production —
-     * `OrchestratorModule` passes it explicitly, and it arrives already wrapped in the decorator
-     * that reads the setting, so nothing here knows the setting exists.
-     */
-    private val cuePlayer: CuePlayer = NoCuePlayer,
+    private val cuePlayer: CuePlayer,
     popUpQueue: PopUpQueue = PopUpQueue()
 ) {
 

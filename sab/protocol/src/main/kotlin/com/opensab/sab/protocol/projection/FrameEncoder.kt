@@ -170,12 +170,4 @@ object FrameEncoder {
             (frame.requestId and 0xFF).toByte()
         )
     }
-
-    fun encodeFirmwareUpdate(frame: ProjectionFrame.FirmwareUpdate): ByteArray {
-        return byteArrayOf(
-            CommandId.FIRMWARE_UPDATE.value.toByte(),
-            (frame.requestId and 0xFF).toByte(),
-            (frame.status and 0xFF).toByte()
-        )
-    }
 }

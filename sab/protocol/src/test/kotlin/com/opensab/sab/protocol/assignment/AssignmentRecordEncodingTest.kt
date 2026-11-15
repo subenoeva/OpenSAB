@@ -87,5 +87,34 @@ class AssignmentRecordEncodingTest {
         assertEquals(1, encoded.size)
         assertArrayEquals(byteArrayOf(0x03), encoded)
     }
-}
 
+    /** Golden vector G6: a non-zero high byte goes first, so 0x0100 is 01 00 and never 00 01. */
+    @Test
+    fun encodeFunctionRecordGoldenVectorG6HighByteFirst() {
+        val record = AssignmentRecord.Function(requestId = RequestId16.fromInt(0x0100), functionId = FunctionId.VOLUME_UP)
+        assertArrayEquals(byteArrayOf(0x01, 0x01, 0x00, 0x05, 0x02), record.encode())
+    }
+
+    /** Golden vector G7: a low byte of 0xFF survives as one byte, after a zero high byte. */
+    @Test
+    fun encodeFunctionRecordGoldenVectorG7LowByteAtItsMaximum() {
+        val record = AssignmentRecord.Function(requestId = RequestId16.fromInt(0x00FF), functionId = FunctionId.VOLUME_UP)
+        assertArrayEquals(byteArrayOf(0x01, 0x00, 0xFF.toByte(), 0x05, 0x02), record.encode())
+    }
+
+    /** Golden vector G5, the trap: every record type writes the id high-then-low at bytes 1 and 2. */
+    @Test
+    fun everyRecordWithAnIdWritesItHighByteFirstGoldenVectorG5() {
+        val id = RequestId16.fromInt(0x1234)
+        val records = listOf(
+            AssignmentRecord.Function(requestId = id, functionId = FunctionId.VOLUME_UP),
+            AssignmentRecord.FunctionHid(requestId = id, functionId = FunctionId.VOLUME_DOWN),
+            AssignmentRecord.Color(requestId = id, colorId = 2, r = 0xD6, g = 0x47, b = 0x47)
+        )
+        records.forEach { record ->
+            val encoded = record.encode()
+            assertEquals(record.toString(), 0x12.toByte(), encoded[1])
+            assertEquals(record.toString(), 0x34.toByte(), encoded[2])
+        }
+    }
+}

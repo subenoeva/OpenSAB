@@ -3,7 +3,6 @@ package com.opensab.domain.call
 import com.opensab.domain.audio.AudioFocus
 import com.opensab.domain.audio.AudioFocusKind
 import com.opensab.domain.audio.AudioFocusLease
-import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.logging.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -47,7 +46,7 @@ interface CallManager {
  */
 class DefaultCallManager(
     private val notifications: CallNotificationBus,
-    private val audioFocus: AudioFocus = NoAudioFocus,
+    private val audioFocus: AudioFocus,
     private val nowMillis: () -> Long = System::currentTimeMillis
 ) : CallManager, TelecomAdapter {
 
@@ -64,6 +63,14 @@ class DefaultCallManager(
 
     private var currentKey: String? = null
     private var commands: CallCommands? = null
+
+    /**
+     * The other calls still live, by key, oldest first: a second call takes the screen, and when it
+     * goes the one under it comes back instead of the manager forgetting a call that is still on.
+     */
+    private val heldCalls = LinkedHashMap<String, HeldCall>()
+
+    private class HeldCall(val call: CallInfo, val commands: CallCommands)
 
     private var busJob: Job? = null
     private var focusJob: Job? = null
@@ -151,10 +158,17 @@ class DefaultCallManager(
         val parsed = CallNotificationParser.parse(event.notification) ?: return
         val key = event.notification.key
 
-        // The commands are refreshed on every repost even when the call did not move: `CallStyle`
-        // swaps answer/decline for hangUp the moment the call is answered, so the newest
-        // notification is the only one holding intents that still work.
-        commands = event.commands
+        heldCalls[key]?.let { held ->
+            heldCalls[key] = HeldCall(
+                call = held.call.copy(
+                    callerName = parsed.callerName,
+                    callerNumber = parsed.callerNumber,
+                    status = parsed.status
+                ),
+                commands = event.commands
+            )
+            return
+        }
 
         val call = if (key == currentKey) {
             // Same call. The timestamp means "when this call showed up", so it survives.
@@ -165,22 +179,39 @@ class DefaultCallManager(
             ) ?: parsed.copy(timestamp = nowMillis())
         } else {
             Log.d("Call from %s (%s)", parsed.callerName, parsed.status)
+            val previousKey = currentKey
+            val previous = _activeCall.value
+            val previousCommands = commands
+            if (previousKey != null && previous != null && previousCommands != null) {
+                heldCalls[previousKey] = HeldCall(previous, previousCommands)
+            }
             currentKey = key
             parsed.copy(timestamp = nowMillis())
         }
 
+        // The commands are refreshed on every repost even when the call did not move: `CallStyle`
+        // swaps answer/decline for hangUp the moment the call is answered, so the newest
+        // notification is the only one holding intents that still work.
+        commands = event.commands
         _activeCall.value = call
     }
 
     private fun onRemoved(key: String) {
+        if (heldCalls.remove(key) != null) return
         if (key != currentKey) return
         Log.d("Call %s is gone", key)
-        forget()
+        val underneath = heldCalls.keys.lastOrNull() ?: return forget()
+        val held = heldCalls.getValue(underneath)
+        heldCalls.remove(underneath)
+        currentKey = underneath
+        commands = held.commands
+        _activeCall.value = held.call
     }
 
     private fun forget() {
         currentKey = null
         commands = null
+        heldCalls.clear()
         _activeCall.value = null
     }
 }

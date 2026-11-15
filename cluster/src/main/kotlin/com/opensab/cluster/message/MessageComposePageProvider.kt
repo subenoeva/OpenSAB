@@ -93,8 +93,8 @@ internal class MessageComposePageProvider(
     private val smsSender: SmsSender,
     private val sentLinger: StateFlow<Duration>,
     private val copy: ClusterTextResolver,
-    private val quickReplies: StateFlow<List<String>> = MutableStateFlow(emptyList()),
-    private val volumeSource: VolumeSource? = null
+    private val quickReplies: StateFlow<List<String>>,
+    private val volumeSource: VolumeSource?
 ) : SpeakingPage, WorkingPage, CuingPage {
 
     override val name: String = "MessageComposePage"

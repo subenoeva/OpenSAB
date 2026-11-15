@@ -1,5 +1,6 @@
 package com.opensab.cluster
 import com.opensab.cluster.call.CallPageProvider
+import com.opensab.domain.audio.NoAudioFocus
 import com.opensab.cluster.indicators.CallIndicator
 import com.opensab.cluster.text.englishClusterText
 import com.opensab.domain.call.CallInfo
@@ -49,7 +50,7 @@ class CallInterruptSourceTest {
         val source = CallInterruptSource(
             activeCall = activeCall,
             mode = MutableStateFlow(InboundCallMode.IGNORE)
-        ) { CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter()) }
+        ) { CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter(), volumeSource = null) }
 
         val seen = mutableListOf<PageProvider?>()
         val job = backgroundScope.launch { source.interrupting.collect { seen += it } }
@@ -71,7 +72,7 @@ class CallInterruptSourceTest {
     fun theCallStillLightsThePhoneBitWhenModeIsIgnore() = testScope.runTest {
         val projector = RecordingScreenProjector()
         val bus = CallNotificationBus()
-        val callManager = DefaultCallManager(bus)
+        val callManager = DefaultCallManager(bus, NoAudioFocus)
         callManager.start(backgroundScope)
         CallIndicator(callManager.activeCall, ActiveIndicatorsPublisher(projector)).start(backgroundScope)
         runCurrent()
@@ -79,7 +80,7 @@ class CallInterruptSourceTest {
         val source = CallInterruptSource(
             activeCall = callManager.activeCall,
             mode = MutableStateFlow(InboundCallMode.IGNORE)
-        ) { CallPageProvider(callManager.activeCall, englishClusterText, callManager) }
+        ) { CallPageProvider(callManager.activeCall, englishClusterText, callManager, volumeSource = null) }
 
         val seen = mutableListOf<PageProvider?>()
         val job = backgroundScope.launch { source.interrupting.collect { seen += it } }
@@ -104,7 +105,7 @@ class CallInterruptSourceTest {
         val activeCall = MutableStateFlow<CallInfo?>(null)
         val mode = MutableStateFlow(InboundCallMode.IGNORE)
         val source = CallInterruptSource(activeCall = activeCall, mode = mode) {
-            CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter())
+            CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter(), volumeSource = null)
         }
 
         val seen = mutableListOf<PageProvider?>()
@@ -132,7 +133,7 @@ class CallInterruptSourceTest {
         val source = CallInterruptSource(
             activeCall = activeCall,
             mode = MutableStateFlow(InboundCallMode.ALERT)
-        ) { CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter()) }
+        ) { CallPageProvider(activeCall, englishClusterText, RecordingTelecomAdapter(), volumeSource = null) }
 
         val seen = mutableListOf<PageProvider?>()
         val job = backgroundScope.launch { source.interrupting.collect { seen += it } }

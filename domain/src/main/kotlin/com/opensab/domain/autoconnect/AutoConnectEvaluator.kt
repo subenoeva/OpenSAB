@@ -2,7 +2,6 @@ package com.opensab.domain.autoconnect
 
 object AutoConnectEvaluator {
 
-    private const val HONDA_BTU_PREFIX = "HONDA BTU"
     const val ACTION_ACL_CONNECTED = "android.bluetooth.device.action.ACL_CONNECTED"
     const val ACTION_ACL_DISCONNECTED = "android.bluetooth.device.action.ACL_DISCONNECTED"
 
@@ -13,7 +12,6 @@ object AutoConnectEvaluator {
      */
     fun evaluate(
         action: String?,
-        deviceName: String?,
         deviceAddress: String?,
         knownVehicleMacs: Set<String>,
         autoConnectEnabled: Boolean,
@@ -25,12 +23,13 @@ object AutoConnectEvaluator {
         }
 
         val normalizedAddress = deviceAddress.uppercase()
-        val isHondaBtu = deviceName?.contains(HONDA_BTU_PREFIX, ignoreCase = true) == true
+        // The address alone: the name is missing without BLUETOOTH_CONNECT or before it is cached,
+        // and a motorcycle on file was identified by its address when it was paired.
         val isKnown = knownVehicleMacs.any { it.equals(normalizedAddress, ignoreCase = true) }
 
         return when (action) {
             ACTION_ACL_CONNECTED -> {
-                if (autoConnectEnabled && isHondaBtu && isKnown) {
+                if (autoConnectEnabled && isKnown) {
                     AutoConnectDecision.Connect(normalizedAddress)
                 } else {
                     AutoConnectDecision.Ignore

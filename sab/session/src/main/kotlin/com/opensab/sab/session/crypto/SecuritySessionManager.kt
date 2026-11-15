@@ -8,10 +8,4 @@ interface SecuritySessionManager {
         macAddress: String,
         transport: GattTransport
     ): Result<SecuritySession>
-
-    suspend fun validateExistingKey(
-        macAddress: String,
-        transport: GattTransport,
-        existingKey: ByteArray
-    ): Result<SecuritySession>
 }

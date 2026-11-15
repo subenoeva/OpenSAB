@@ -39,14 +39,14 @@ class AndroidMediaAppLauncher(
     private val audioKeyDispatcher: AudioKeyDispatcher,
     private val coroutineScope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main,
-    private val appOpener: AppOpenerSeam? = null,
-    private val sessionSource: MediaSessionSource? = null,
+    private val appOpener: AppOpenerSeam?,
+    private val sessionSource: MediaSessionSource?,
     /**
      * The media ID to dispatch for the package being launched, or null for none. The caller
      * resolves the package match, so the launcher never sees a pin belonging to another app.
      * Suspends rather than blocks: it is read from a `MediaBrowserCompat` callback on the main thread.
      */
-    private val coldStartMediaIdProvider: suspend (String) -> String? = { null }
+    private val coldStartMediaIdProvider: suspend (String) -> String?
 ) : MediaAppLauncher {
 
     /**

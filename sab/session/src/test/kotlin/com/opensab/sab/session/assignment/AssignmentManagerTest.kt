@@ -7,14 +7,18 @@ import com.opensab.sab.session.ble.MockGattTransport
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import com.opensab.logging.Log
+import com.opensab.logging.LogSink
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -130,6 +134,40 @@ class AssignmentManagerTest {
         assertTrue(report.rejected.isEmpty())
         assertEquals(27, report.timedOut.size)
         assertTrue(report.isClean.not())
+    }
+
+    /** The blind run is for a channel that failed to arm, not for a caller that went away. */
+    @Test
+    fun shouldNotRunBlindWhenTheCallerIsCancelledWhileTheSubscriptionArms() = testScope.runTest {
+        val base = MockGattTransport()
+        base.connect()
+        var assignmentWrites = 0
+        base.onCharacteristicWrite = { uuid, _ -> if (uuid == SabGattUuids.CHAR_ASSIGNMENT_CONTROL) assignmentWrites++ }
+        val transport = object : GattTransport by base {
+            override fun observeNotifications(
+                serviceUuid: UUID,
+                characteristicUuid: UUID,
+                onSubscriptionArmed: (suspend () -> Unit)?
+            ): Flow<ByteArray> {
+                if (characteristicUuid == SabGattUuids.CHAR_ASSIGNMENT_CONTROL) {
+                    return flow { awaitCancellation() }
+                }
+                return base.observeNotifications(serviceUuid, characteristicUuid, onSubscriptionArmed)
+            }
+        }
+        val warnings = mutableListOf<String?>()
+        val sink = LogSink { priority, _, message, _ -> if (priority == Log.WARN) warnings += message }
+        Log.install(sink)
+        try {
+            val caller = launch { DefaultAssignmentManager().executeAssignment(transport, backgroundScope) }
+            caller.cancel()
+            caller.join()
+
+            assertEquals(0, assignmentWrites)
+            assertEquals(emptyList<String?>(), warnings)
+        } finally {
+            Log.uninstall(sink)
+        }
     }
 
     /**

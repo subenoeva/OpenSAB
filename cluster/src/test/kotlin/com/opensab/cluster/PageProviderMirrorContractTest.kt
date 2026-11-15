@@ -100,7 +100,7 @@ class PageProviderMirrorContractTest {
 
         MirrorScenario("RootMenuPageProvider / entry with a page") {
             MirrorProbe(
-                provider = RootMenuPageProvider(entries = allRootMenuEntries(), pageFactory = { stubPage() }, copy = englishClusterText),
+                provider = RootMenuPageProvider(entries = allRootMenuEntries(), pageFactory = { stubPage() }, copy = englishClusterText, musicState = null, navInstruction = null, activeCall = null, currentWeather = null, currentMessage = null, musicLoadingPageFactory = null, messageMenuPageFactory = null),
                 doubles = RecordingDoubles()
             )
         },
@@ -111,7 +111,13 @@ class PageProviderMirrorContractTest {
                     entries = allRootMenuEntries(),
                     currentWeather = MutableStateFlow(null),
                     pageFactory = { stubPage() },
-                    copy = englishClusterText
+                    copy = englishClusterText,
+                    musicState = null,
+                    navInstruction = null,
+                    activeCall = null,
+                    currentMessage = null,
+                    musicLoadingPageFactory = null,
+                    messageMenuPageFactory = null
                 ),
                 doubles = RecordingDoubles()
             )
@@ -224,7 +230,7 @@ class PageProviderMirrorContractTest {
             val volume = RecordingVolumeSource()
             message.setMessage(MessageInfo(sender = "Ana", body = "On my way"))
             MirrorProbe(
-                provider = MessagePageProvider(message.currentMessage, englishClusterText, message, volumeSource = volume),
+                provider = MessagePageProvider(message.currentMessage, englishClusterText, message, volumeSource = volume, canReply = MutableStateFlow(false)),
                 doubles = RecordingDoubles(volume = volume, message = message)
             )
         },
@@ -251,7 +257,7 @@ class PageProviderMirrorContractTest {
             val message = MockMessageSource()
             val volume = RecordingVolumeSource()
             MirrorProbe(
-                provider = MessagePageProvider(message.currentMessage, englishClusterText, message, volumeSource = volume),
+                provider = MessagePageProvider(message.currentMessage, englishClusterText, message, volumeSource = volume, canReply = MutableStateFlow(false)),
                 doubles = RecordingDoubles(volume = volume, message = message)
             )
         },
@@ -269,6 +275,7 @@ class PageProviderMirrorContractTest {
                     messageSource = message,
                     sentLinger = MutableStateFlow(2.seconds),
                     copy = englishClusterText,
+                    quickReplies = MutableStateFlow(emptyList()),
                     volumeSource = volume
                 ),
                 doubles = RecordingDoubles(volume = volume, message = message)
@@ -406,6 +413,7 @@ class PageProviderMirrorContractTest {
                     smsSender = sender,
                     sentLinger = MutableStateFlow(2.seconds),
                     copy = englishClusterText,
+                    quickReplies = MutableStateFlow(emptyList()),
                     volumeSource = volume
                 ),
                 doubles = RecordingDoubles(volume = volume, smsSender = sender)

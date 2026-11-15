@@ -1,5 +1,9 @@
 package com.opensab.cluster
 
+import com.opensab.cluster.NoInterruptions
+import com.opensab.domain.audio.NoAudioFocus
+import com.opensab.domain.audio.NoCuePlayer
+import com.opensab.domain.settings.VoiceVerbosity
 import com.opensab.cluster.mirror.MIRROR_REQUEST_ID
 import com.opensab.cluster.mirror.MirrorDelivery
 import com.opensab.cluster.mirror.MirrorPage
@@ -79,9 +83,17 @@ class BaseStateManagerTest {
                     val stub = StubPageProvider("stub", ProjectionFrame.RequestSabMode(1))
                     if (item == RootMenuItem.MUSIC) musicPage ?: stub else stub
                 },
-                copy = englishClusterText
+                copy = englishClusterText,
+                musicState = null,
+                navInstruction = null,
+                activeCall = null,
+                currentWeather = null,
+                currentMessage = null,
+                musicLoadingPageFactory = null,
+                messageMenuPageFactory = null
             )
-        }
+        },
+        cuePlayer = NoCuePlayer
     )
 
     @Test
@@ -264,9 +276,19 @@ class BaseStateManagerTest {
                 RootMenuPageProvider(
                     entries = allRootMenuEntries(),
                     pageFactory = { StubPageProvider("stub", ProjectionFrame.RequestSabMode(1)) },
-                    copy = englishClusterText
+                    copy = englishClusterText,
+                    musicState = null,
+                    navInstruction = null,
+                    activeCall = null,
+                    currentWeather = null,
+                    currentMessage = null,
+                    musicLoadingPageFactory = null,
+                    messageMenuPageFactory = null
                 )
-            }
+            },
+            interruptSource = NoInterruptions,
+            pageVoice = null,
+            cuePlayer = NoCuePlayer
         )
         stateManager.start(input, backgroundScope)
         input.assumeSabMode()
@@ -934,11 +956,14 @@ class BaseStateManagerTest {
     private fun voiceOf(synthesizer: MockSpeechSynthesizer) = PageVoice(
         { request -> if (request.token.name.startsWith("ROOT_")) "" else "said:${request.token}" },
         synthesizer,
-        sessionScope = testScope.backgroundScope
+        sessionScope = testScope.backgroundScope,
+        audioFocus = NoAudioFocus,
+        verbosity = { VoiceVerbosity.STANDARD },
+        inCall = { false }
     )
 
     private fun narratingVoiceOf(synthesizer: MockSpeechSynthesizer) =
-        PageVoice({ request -> "said:${request.token}" }, synthesizer, sessionScope = testScope.backgroundScope)
+        PageVoice({ request -> "said:${request.token}" }, synthesizer, sessionScope = testScope.backgroundScope, audioFocus = NoAudioFocus, verbosity = { VoiceVerbosity.STANDARD }, inCall = { false })
 
     private suspend fun FakeInputDispatcher.openMusic() {
         enterMode(DashboardMode.SAB_MODE)
@@ -1444,7 +1469,9 @@ class BaseStateManagerTest {
             resolver = { "" },
             synthesizer = MockSpeechSynthesizer(),
             audioFocus = audioFocus,
-            sessionScope = backgroundScope
+            sessionScope = backgroundScope,
+            verbosity = { VoiceVerbosity.STANDARD },
+            inCall = { false }
         )
         voice.say(listOf(SpeechRequest(SpeechToken.ROOT_MUSIC)))
         assertEquals(0, abandonCount)

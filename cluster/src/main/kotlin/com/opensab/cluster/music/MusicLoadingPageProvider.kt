@@ -44,7 +44,7 @@ class MusicLoadingPageProvider(
     private val volumeControl: StateFlow<Boolean>,
     private val livePageFactory: () -> PageProvider,
     private val errorPageFactory: () -> PageProvider,
-    private val musicManager: MusicManager? = null,
+    private val musicManager: MusicManager?,
     private val timeoutDuration: Duration = 8.seconds
 ) : WorkingPage, SpeakingPage {
 

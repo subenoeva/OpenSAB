@@ -87,7 +87,7 @@ class CallDialPageProvider(
     private val livePageFactory: () -> PageProvider,
     /** No default: one would be a page painting English because the graph forgot. */
     private val copy: ClusterTextResolver,
-    private val volumeSource: VolumeSource? = null,
+    private val volumeSource: VolumeSource?,
     /** The session's call, watched only to hand over once the placed call is live. */
     private val activeCall: StateFlow<CallInfo?>
 ) : SpeakingPage, WorkingPage, CuingPage {

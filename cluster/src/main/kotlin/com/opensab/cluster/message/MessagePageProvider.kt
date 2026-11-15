@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.onEach
 class MessagePageProvider(
     private val currentMessage: StateFlow<MessageInfo?>,
     private val copy: ClusterTextResolver,
-    private val messageSource: MessageSource? = null,
+    private val messageSource: MessageSource?,
     /**
      * Whether the live notification published a way to answer it.
      *
@@ -53,8 +53,8 @@ class MessagePageProvider(
      * the right button of the frame, the `SELECT` branch and the `PRIMARY` zone of the mirror off
      * this one flow, so a thread that cannot be answered closes all three together.
      */
-    private val canReply: StateFlow<Boolean> = MutableStateFlow(false),
-    private val volumeSource: VolumeSource? = null,
+    private val canReply: StateFlow<Boolean>,
+    private val volumeSource: VolumeSource?,
     /**
      * The dictation page, resolved on the first press and kept.
      *

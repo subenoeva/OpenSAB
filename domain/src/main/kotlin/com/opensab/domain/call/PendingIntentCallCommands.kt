@@ -29,7 +29,7 @@ class PendingIntentCallCommands<T : Any>(
     private val answerIntent: T?,
     private val declineIntent: T?,
     private val hangUpIntent: T?,
-    private val fallback: CallCommands? = null,
+    private val fallback: CallCommands?,
     private val send: (T) -> Unit
 ) : CallCommands {
 

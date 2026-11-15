@@ -153,12 +153,10 @@ class VehicleFramePolicyTest {
         val indicators = ProjectionFrame.ActiveIndicators(requestId = 9, indicatorMask = 0x05)
         val sabMode = ProjectionFrame.RequestSabMode(requestId = 10)
         val dismiss = ProjectionFrame.DismissModal(requestId = 11)
-        val fw = ProjectionFrame.FirmwareUpdate(requestId = 12, status = 1)
 
         assertEquals(indicators, policy.adapt(indicators, segments))
         assertEquals(sabMode, policy.adapt(sabMode, segments))
         assertEquals(dismiss, policy.adapt(dismiss, segments))
-        assertEquals(fw, policy.adapt(fw, segments))
     }
 
     @Test

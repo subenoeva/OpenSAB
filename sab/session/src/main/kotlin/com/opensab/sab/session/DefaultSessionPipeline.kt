@@ -43,13 +43,13 @@ class DefaultSessionPipeline(
     private val onSabModeNotGranted: () -> Unit,
     /** Read once per session, at open: a change with the session live applies to the next one. */
     private val sabModeFallbacks: suspend () -> SabModeFallbacks,
-    private val activeIndicatorsPublisher: ActiveIndicatorsPublisher? = null,
-    private val ctsServer: CtsServer? = null,
+    private val activeIndicatorsPublisher: ActiveIndicatorsPublisher?,
+    private val ctsServer: CtsServer?,
     /** Read once per session, at open: a change with the session live applies to the next one. */
     private val clockSyncEnabled: suspend () -> Boolean,
     private val liveLinkHolder: LiveSessionLinkHolder,
-    private val announcer: SessionAnnouncer? = null,
-    private val storedProfileResolver: StoredVehicleProfileResolver? = null
+    private val announcer: SessionAnnouncer?,
+    private val storedProfileResolver: StoredVehicleProfileResolver?
 ) : SessionPipeline {
 
     override fun announceOpened(session: SabSession) {
